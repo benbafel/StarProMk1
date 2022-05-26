@@ -17,7 +17,6 @@ import com.benbafel.prototipospots.models.Spot
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
@@ -26,7 +25,6 @@ private const val TAG = "MapsActivity"
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var infoShown: Boolean = true
     private var lastMarkerPosition = LatLng(-0.00, -0.00)
-    val db = Firebase.firestore
     private lateinit var mMap: GoogleMap
     private var markers: MutableList<Marker> = mutableListOf()
     private lateinit var binding: ActivityMapsBinding
@@ -61,10 +59,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        val boundsBuilder = LatLngBounds.builder()
+       // val boundsBuilder = LatLngBounds.builder()
         //Display Markers on the map, based on input list of places
-        var  spots : MutableList<Spot> = mutableListOf()
-        loadSpots(mMap,db,spots)
+        //val  spots : MutableList<Spot> = mutableListOf()
+        //loadSpots(mMap,spots)
 
 
       /*  for(spot){
@@ -103,7 +101,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
             true
         }
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(),1000,1000,0))
 
 
         mMap.setOnInfoWindowClickListener { markerToDelete ->
@@ -119,7 +116,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
     }
 
-    private fun loadSpots(mMap: GoogleMap, db: FirebaseFirestore, spots: MutableList<Spot>)  {
+    private fun loadSpots(mMap: GoogleMap, spots: MutableList<Spot>)  {
+        val db = Firebase.firestore
         db.collection("spots")
             .get()
             .addOnSuccessListener { documents ->
