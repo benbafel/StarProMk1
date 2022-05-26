@@ -1,16 +1,16 @@
 package com.benbafel.prototipospots.models
 import java.io.Serializable
 data class Spot (var name: String?,
-             var description: String?,
-             var createdBy: String?,
-             var latitude: Double,
-             var longitude: Double,
-             var bortleCenter: Int,
-             var maxBortle: Int,
-             var accesibility: String?,
-             var spotQuality: Int
-             //route:
-             ) :Serializable{
+                 var description: String?,
+                 var createdBy: String?,
+                 val latitude: Double,
+                 val longitude: Double,
+                 var bortleCenter: Int,
+                 var maxBortle: Int,
+                 var accesibility: String?,
+                 var spotQuality: Int
+                 //route:
+                 ) :Serializable{
 
     private fun setSpotQuality(bortleCenter: Int,maxBortle: Int) {
         when{
