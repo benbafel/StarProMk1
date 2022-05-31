@@ -7,4 +7,22 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="bortle1">@color/black</color>
+    <color name="bortle2">#1201ff</color>
+    <color name="bortle3">#548d00</color>
+    <color name="bortle3.">#76c801</color>
+    <color name="bortle4">#ffea03</color>
+    <color name="bortle5.">#fec200</color>
+    <color name="bortle5">#ff9000</color>
+    <color name="bortle6">#ff5300</color>
+    <color name="bortle7">#ee0f00</color>
+    <color name="bortle8">#b20000</color>
+    <color name="bortle9">#dd00af</color>
+    <color name="cream">#F3F2D2</color>
+    <color name="variableColor">#799FFF</color>
+    <color name="Facil">#44FF00</color>
+    <color name="Normal">#FFEA00</color>
+    <color name="Dificil">#F46608</color>
+    <color name="Muy_Dificil">#F10000</color>
+    <color name="grey">#CECECD</color>
 </resources>

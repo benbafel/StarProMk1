@@ -2,9 +2,14 @@
 
 package com.benbafel.prototipospots
 
+
+import java.text.DecimalFormat
+import android.content.DialogInterface
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -14,13 +19,15 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.benbafel.prototipospots.databinding.ActivityMapsBinding
 import com.benbafel.prototipospots.models.Spot
-import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 
+const val EXTRA_CREATE_TITLE = "EXTRA_CREATE_TITLE"
+const val REQUEST_CODE = 1234
+const val EXTRA_LAT = "EXTRA_LAT"
+const val EXTRA_LNG = "LNG"
 private const val TAG = "MapsActivity"
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var infoShown: Boolean = true
@@ -44,6 +51,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 .setActionTextColor(ContextCompat.getColor(this,android.R.color.white))
                 .show()
         }
+
     }
 
 
@@ -59,18 +67,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-       // val boundsBuilder = LatLngBounds.builder()
-        //Display Markers on the map, based on input list of places
+
         //val  spots : MutableList<Spot> = mutableListOf()
-        //loadSpots(mMap,spots)
+        //this.loadSpots()
+        mMap.setOnMapLongClickListener { latLng ->
+            Log.i(TAG,"setOnMapLongClickListener")
+            showAlertDialog(latLng)
 
-
-      /*  for(spot){
-            val latLng = LatLng(spot.latitude,spot.longitude)
-            boundsBuilder.include(latLng)
-            mMap.addMarker(MarkerOptions().position(latLng).title(spot.title).snippet(spot.description))
-
-        }  */
+        }
 
         mMap.setOnMarkerClickListener{marker ->
 
@@ -104,9 +108,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
         mMap.setOnInfoWindowClickListener { markerToDelete ->
-            Log.i(TAG,"OnInfoWindowClickListener- Delete")
-            markers.remove(markerToDelete)
-            markerToDelete.remove()
+            Log.i(TAG,"OnInfoWindowClickListener")
+           /* markers.remove(markerToDelete)
+            markerToDelete.remove() */
         }
 
 
@@ -116,21 +120,42 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
     }
 
-    private fun loadSpots(mMap: GoogleMap, spots: MutableList<Spot>)  {
+
+    private fun showAlertDialog(latLng: LatLng) {
+        val df = DecimalFormat("#.####")
+        Log.i(TAG,"VALOR coordenadas: $latLng")
+        val dialog =
+            AlertDialog.Builder(this)
+                .setTitle("Crear punto de observación")
+                .setMessage("Quieres crear un punto de observacion en las coordenadas:\n" +
+                        "Latitud: ${df.format(latLng.latitude)}\nLongitud: ${df.format(latLng.longitude)}")
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Ok",null)
+                .show()
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener{
+            val intent = Intent(this@MapsActivity,CreateMarkerActivity::class.java)
+            val stringLat = latLng.latitude.toString()
+            val stringLng = latLng.longitude.toString()
+            intent.putExtra(EXTRA_LAT,stringLat)
+            intent.putExtra(EXTRA_LNG,stringLng)
+            intent.putExtra(EXTRA_CREATE_TITLE,"Crear punto de observación")
+            Log.i(TAG,"$stringLat ,$stringLng")
+            startActivityForResult(intent,REQUEST_CODE)
+            dialog.dismiss()
+        }
+    }
+
+    private fun loadSpots()  {
         val db = Firebase.firestore
         db.collection("spots")
             .get()
-            .addOnSuccessListener { documents ->
-                val boundsBuilder = LatLngBounds.builder()
-                for (document in documents){
-                    Log.i(TAG,"${document.id} => ${document.data}")
-                    val spot = document.toObject<Spot>()
-                    spots.add(spot)
-                    val latLng = LatLng(spot.latitude,spot.longitude)
-                    boundsBuilder.include(latLng)
-                    mMap.addMarker(MarkerOptions().position(latLng).title(spot.name).snippet("Clic aquí para ver detalles del punto"))
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    Log.d(TAG, "${document.id} => ${document.data}")
                 }
-
+            }
+            .addOnFailureListener { exception ->
+                Log.d(TAG, "Error getting documents: ", exception)
             }
 
             .addOnFailureListener { exception ->

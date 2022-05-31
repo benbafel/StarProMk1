@@ -1,14 +1,15 @@
 package com.benbafel.prototipospots.models
+import com.google.android.gms.maps.model.LatLng
 import java.io.Serializable
-data class Spot (var name: String?,
+data class Spot (val id: String,
+                 var name: String,
                  var description: String?,
-                 var createdBy: String?,
-                 val latitude: Double,
-                 val longitude: Double,
+                 var createdBy: String,
+                 var latLng: LatLng,
                  var bortleCenter: Int,
                  var maxBortle: Int,
-                 var accesibility: String?,
-                 var spotQuality: Int
+                 var accesibility: Int,
+                 var spotQuality: Int?
                  //route:
                  ) :Serializable{
 
