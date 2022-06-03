@@ -27,6 +27,7 @@ import java.text.DecimalFormat
 import kotlin.math.pow
 import kotlin.math.sqrt
 
+const val EXTRA_SPOT_INFO_TITLE = "EXTRA_SPOT_INFO_TITLE"
 const val EXTRA_CREATE_TITLE = "EXTRA_CREATE_TITLE"
 const val REQUEST_CODE = 1234
 const val EXTRA_LAT = "EXTRA_LAT"
@@ -178,11 +179,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     .get()
                     .addOnSuccessListener { result ->
                         for (document in result){
+                            val intent = Intent(this@MapsActivity, DisplaySpotInfoActivity::class.java)
                             val dialog =
                                 AlertDialog.Builder(this)
                                     .setMessage("${document.data}")
                                     .setPositiveButton("ok",null)
                                     .show()
+                            intent.putExtra(EXTRA_LAT, placeLat)
+                            intent.putExtra(EXTRA_LNG, placeLng)
+                            intent.putExtra(EXTRA_SPOT_INFO_TITLE, "${place.title}")
+                            startActivityForResult(intent, REQUEST_CODE)
                         }
 
                     }
