@@ -10,6 +10,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat">
         <activity
+            android:name=".DisplaySpotInfoActivity"
+            android:exported="false" />
+        <activity
             android:name=".CreateMarkerActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />

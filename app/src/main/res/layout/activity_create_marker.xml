@@ -217,7 +217,7 @@
             android:background="#4E4D4B"
             android:ems="10"
             android:gravity="start|top"
-            android:hint="Escriba aca si comentario..."
+            android:hint="Escriba aca su comentario..."
             android:inputType="textMultiLine"
             android:minHeight="48dp"
             app:barrierMargin="@dimen/material_emphasis_medium"

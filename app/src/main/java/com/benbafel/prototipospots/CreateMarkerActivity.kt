@@ -6,24 +6,22 @@ import android.content.DialogInterface
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.Editable
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.benbafel.prototipospots.databinding.ActivityCreateMarkerBinding
-import com.benbafel.prototipospots.models.ColorSpinnerAdapter
-import com.benbafel.prototipospots.models.ListaColor
-import com.benbafel.prototipospots.models.ColorObject
-import com.benbafel.prototipospots.models.Spot
+import com.benbafel.prototipospots.models.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firestore.v1.FirestoreGrpc
-import com.google.type.LatLng
 import kotlinx.android.synthetic.main.activity_create_marker.*
 import java.text.DecimalFormat
+import java.util.*
 
-
+const val EXTRA_PLACE = "EXTRA_SPOT"
 private val df = DecimalFormat("#.#####")
 private const val TAG = "CreateMarkerActivity"
 @Suppress("DEPRECATION")
@@ -32,6 +30,7 @@ class CreateMarkerActivity : AppCompatActivity() {
     lateinit var selectedBortleCenter: ColorObject
     lateinit var selectedBortleArea : ColorObject
     lateinit var selectedAccessibility: ColorObject
+    var spotQlty: Int = 0
     var positionCenter :Int? = null
     var positionArea :Int? = null
     var positionAccessibility :Int? = null
@@ -46,11 +45,8 @@ class CreateMarkerActivity : AppCompatActivity() {
         
         loadView()
 
-
         Log.i(TAG, " Intent Crear punto")
-        Log.i(TAG, "${intent.getStringExtra(EXTRA_LAT)},${intent.getStringExtra(EXTRA_LNG)}")
-
-
+        Log.i(TAG, "${intent.getDoubleExtra(EXTRA_LAT,0.00)},${intent.getDoubleExtra(EXTRA_LNG,0.00)}")
 
         supportActionBar?.title = intent.getStringExtra(EXTRA_CREATE_TITLE)
 
@@ -70,17 +66,63 @@ class CreateMarkerActivity : AppCompatActivity() {
     private fun saveSpot() {
         when {
             viewsRfull() -> {
-                val dialog =
+                var dialog =
                     AlertDialog.Builder(this)
-                        .setMessage("todas las vistas llenas")
-                        .setPositiveButton("Ok", null)
+                        .setTitle("Crear nuevo punto de observación")
+                        .setMessage("Estas seguro que deseas crear un punto nuevo?")
+                        .setPositiveButton("Estoy seguro", null)
+                        .setNegativeButton("Cancelar",null)
                         .show()
                 dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
-                    dialog.dismiss()
+                    val db = Firebase.firestore
+                    val spotId = UUID.randomUUID().toString()
+                    val spotName = "punto de prueba"
+                    val descChar = etCommentary.text as CharSequence
+                    val description = removeNewLine(descChar).toString()
+                    val spotUser = "benbafel"
+                    val lat = intent.getDoubleExtra(EXTRA_LAT,0.00)
+                    val lng = intent.getDoubleExtra(EXTRA_LNG,0.00)
+                    val bortleCenterSpot = positionCenter
+                    val borleAreaSpot = positionArea
+                    val accessibilitySpot = positionAccessibility
+                    val spotQuality = setSpotQuality(bortleCenterSpot,borleAreaSpot)
+                    val spot = Spot(
+                        spotId,
+                        spotName,
+                        description,
+                        spotUser,
+                        lat,
+                        lng,
+                        bortleCenterSpot,
+                        borleAreaSpot,
+                        accessibilitySpot,
+                        spotQuality)
+                    //Check if spot exists
+                    db.collection("spots").document(spotId)
+                        .set(spot)
+                        .addOnSuccessListener {
+                            Log.d(TAG, "DocumentSnapshot successfully written!")
+                            dialog.dismiss()
+                            dialog =
+                                AlertDialog.Builder(this)
+                                    .setTitle("Punto creado")
+                                    .setMessage("Se ha creado el punto exitosamente")
+                                    .setPositiveButton("Ok", null)
+                                    .show()
+                            dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                                val data = Intent()
+                                val place = Place(spotId,spot.name,spot.description,spot.lat,spot.lng)
+                                data.putExtra(EXTRA_PLACE,place)
+                                setResult(Activity.RESULT_OK,data)
+                                finish()
+                            }
+
+                        }
+                        .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
                 }
+
             }
             else -> {
-                Log.i(TAG, "S")
                 val dialog2 =
                     AlertDialog.Builder(this)
                         .setMessage("FALTAN VISTAS POR LLENAR")
@@ -94,17 +136,20 @@ class CreateMarkerActivity : AppCompatActivity() {
 
     }
 
+    private fun removeNewLine(descChar: CharSequence): CharSequence {
+        var descChar2 = descChar
+        while(descChar2.endsWith(" ") || descChar2.endsWith("\n") ) {
+            descChar2 = descChar2.dropLast(1)
+        }
+        return descChar2
+    }
+
     private fun viewsRfull(): Boolean {
         return (positionAccessibility != null
                 && positionCenter != null
                 && positionArea != null
-                && etCommentary.text.isNotEmpty())
+                && etCommentary.text.trim().isNotEmpty())
         }
-
-
-
-
-
 
     private fun loadAccessibilitySpinner() {
          selectedAccessibility = ListaColor().defaultColorAccessibility
@@ -166,6 +211,34 @@ class CreateMarkerActivity : AppCompatActivity() {
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
+        }
+    }
+
+    private fun setSpotQuality(bortleCenter: Int?,maxBortle: Int?): Int {
+         when {
+            bortleCenter!! <= 2 && maxBortle!! <= 2 -> {
+                spotQlty = 5
+                return spotQlty
+            }
+            bortleCenter == 3 && maxBortle == 3 -> {
+                spotQlty = 4
+                return spotQlty
+            }
+            bortleCenter in 4..5 && maxBortle in 4..5 -> {
+                spotQlty = 3
+                return spotQlty
+            }
+            bortleCenter in 6..7 && maxBortle in 6..7 -> {
+                spotQlty = 2
+                return spotQlty
+            }
+            bortleCenter in 8..9 && maxBortle in 8..9 -> {
+                spotQlty = 1
+                return spotQlty
+            }
+             else -> {
+                 return 0
+             }
         }
     }
     /* private fun fillLatLng() {

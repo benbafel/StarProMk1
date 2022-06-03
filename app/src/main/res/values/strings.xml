@@ -17,4 +17,5 @@
     <string name="bortle_lvl_8">8.Cielo urbano</string>
     <string name="bortle_lvl_9">9.Cielo de centro de ciudad</string>
     <string name="upload_route">upload route</string>
+    <string name="coordenadas">Coordenadas</string>
 </resources>
