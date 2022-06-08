@@ -5,6 +5,7 @@ package com.benbafel.prototipospots
 import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
+import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
@@ -31,7 +32,7 @@ const val EXTRA_SPOT_INFO_TITLE = "EXTRA_SPOT_INFO_TITLE"
 const val EXTRA_CREATE_TITLE = "EXTRA_CREATE_TITLE"
 const val REQUEST_CODE = 1234
 const val EXTRA_LAT = "EXTRA_LAT"
-const val EXTRA_LNG = "LNG"
+const val EXTRA_LNG = "EXTRA_LNG"
 private const val TAG = "MapsActivity"
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var infoShown: Boolean = true
@@ -41,7 +42,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var markers: MutableList<Marker> = mutableListOf()
     private lateinit var binding: ActivityMapsBinding
     private val places: MutableList<Place> = mutableListOf()
-    private  val df = DecimalFormat("#.####")
+    private val df = DecimalFormat("#.####")
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,8 +56,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
         mapFragment.view?.let {
             Snackbar.make(it, "Long press to add a marker!", Snackbar.LENGTH_INDEFINITE)
-                .setAction("Ok", {})
-                .setActionTextColor(ContextCompat.getColor(this, android.R.color.white))
+                .setAction("Ok") {}
+                .setActionTextColor(ContextCompat.getColor(this, android.R.color.holo_green_light))
                 .show()
         }
 
@@ -74,7 +75,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
         //val  spots : MutableList<Spot> = mutableListOf()
 
         //Carga puntos en una lista mutable
@@ -90,7 +90,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         mMap.setOnMarkerClickListener { marker ->
 
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(marker.position))
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(marker.position),600,null)
             when {
                 (lastMarkerPosition == marker.position && infoShown) -> {//V : V = F
                     Log.i(TAG, "hide same point")
@@ -128,14 +128,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // Add a marker in Sydney and move the camera
         val santiago = LatLng(-33.45694, -70.64827)
-        mMap.addMarker(MarkerOptions().position(santiago).title("Santiago"))
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(santiago,10f),4000,null)
+        //mMap.addMarker(MarkerOptions().position(santiago).title("Santiago"))
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(santiago, 10f), 1000, null)
+
     }
 
     private fun closeToMarker(latLng: LatLng): Boolean {
         for (place in places) {
             val dist = df.format(calculaDist(latLng, place.latitude, place.longitude)).toDouble()
-            Log.i(TAG, "dist = ${dist} to ${place.description}")
+            Log.i(TAG, "dist = $dist to ${place.description}")
             if (dist < 0.0122) {
                 actualPlace = place
                 return true
@@ -163,6 +164,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun getPlaceFromPlaces(markerInfo: Marker) {
+        Log.i(TAG,"places is empty = ${places.isEmpty()}")
         val db = Firebase.firestore
         val spotsRef = db.collection("spots")
         for (place in places){
@@ -174,23 +176,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val markerlatLng = LatLng(markerLat,markerLng)
 
             if(placelatLng == markerlatLng){
+                actualPlace=place
                 spotsRef.whereEqualTo("id",place.id)
                     .limit(1)
                     .get()
                     .addOnSuccessListener { result ->
                         for (document in result){
                             val intent = Intent(this@MapsActivity, DisplaySpotInfoActivity::class.java)
-                            val dialog =
-                                AlertDialog.Builder(this)
-                                    .setMessage("${document.data}")
-                                    .setPositiveButton("ok",null)
-                                    .show()
-                            intent.putExtra(EXTRA_LAT, placeLat)
-                            intent.putExtra(EXTRA_LNG, placeLng)
-                            intent.putExtra(EXTRA_SPOT_INFO_TITLE, "${place.title}")
-                            startActivityForResult(intent, REQUEST_CODE)
-                        }
 
+                            intent.putExtra(EXTRA_PLACE,actualPlace)
+                            intent.putExtra(EXTRA_SPOT_INFO_TITLE, "${place.title}")
+                            startActivity(intent)
+                        }
                     }
 
             }
@@ -228,6 +225,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 dialog.dismiss()
             }
         }else{
+            Log.i(TAG,"actual place = ${actualPlace?.description}")
 
             val dialog =
                 AlertDialog.Builder(this)
@@ -253,13 +251,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun loadSpots(mMap: GoogleMap) {
         val db = Firebase.firestore
+        var cont = 0
         val spotsCollection = db.collection("spots")
         spotsCollection
             .get()
             .addOnSuccessListener { result ->
                 Log.i(TAG, "SE PUDO LEER DE LA BASE DE DATOS")
                 for (document in result) {
-                    Log.i(TAG, "se lee spot como ${document.id}")
+                    Log.i(TAG, "se lee spot como ${document.id}, Pos = $cont")
                     val docData = document.data
                     val placeDescript = docData["description"] as String?
                     val placeName = docData["name"] as String
@@ -267,7 +266,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     val placeLng = docData["lng"] as Double
                     val placeId = docData["id"] as String
                     val place = Place(placeId,placeName, placeDescript, placeLat, placeLng)
-                    places.add(0,place)
+                    places.add(cont,place)
+                    cont+=1
                 }
                 for (place in places) {
 
@@ -279,6 +279,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             .snippet(place.description)
                     )
                 }
+
             }
             .addOnFailureListener { exception ->
                 Log.d(TAG, "Error getting documents: ", exception)

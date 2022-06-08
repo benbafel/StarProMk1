@@ -32,13 +32,13 @@ class ListaColor {
             ColorObject("Elija nivel de luminosidad","799FFF",blackHex),
             ColorObject("1.Cielo oscuro excelente","FF000000",whiteHex),
             ColorObject("2.Cielo oscuro tipico","1201ff",whiteHex),
-            ColorObject("3.Cielo rural","65aa00",whiteHex),
+            ColorObject("3.Cielo rural","65aa00",blackHex),
             ColorObject("4.Cielo rural-periurbano","ffea03",blackHex),
-            ColorObject("5.Cielo periurbano","feae00",whiteHex),
-            ColorObject("6.Cielo periurbano brillante","ff5300",whiteHex),
-            ColorObject("7.Cielo periurbano-urbano","ee0f00",whiteHex),
-            ColorObject("8.Cielo urbano","b20000",whiteHex),
-            ColorObject("9.Cielo de centro de ciudad","dd00af",whiteHex)
+            ColorObject("5.Cielo periurbano","feae00",blackHex),
+            ColorObject("6.Cielo periurbano brillante","ff5300",blackHex),
+            ColorObject("7.Cielo periurbano-urbano","ee0f00",blackHex),
+            ColorObject("8.Cielo urbano","b20000",blackHex),
+            ColorObject("9.Cielo de centro de ciudad","dd00af",blackHex)
         )
     }
 
@@ -47,8 +47,8 @@ class ListaColor {
             ColorObject("Elija  Accesibilidad","799FFF",blackHex),
             ColorObject("Facil","44FF00",blackHex),
             ColorObject("Normal","FFEA00",blackHex),
-            ColorObject("Dificil","F46608",whiteHex),
-            ColorObject("Muy Dificil","F10000",whiteHex)
+            ColorObject("Dificil","F46608",blackHex),
+            ColorObject("Muy Dificil","F10000",blackHex)
         )
 
     }

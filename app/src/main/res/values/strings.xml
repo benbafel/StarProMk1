@@ -7,15 +7,29 @@
     <string name="escala_de_bortle">Escala de Bortle</string>
     <string name="ruta_opcional">Ruta (opcional)</string>
     <string name="accesibilidad">Accesibilidad</string>
-    <string name="bortle_lvl_1">1.Cielo oscuro excelente</string>
-    <string name="bortle_lvl_2">2.Cielo oscuro tipico</string>
-    <string name="bortle_lvl_3">3.Cielo rural</string>
-    <string name="bortle_lvl_4">4.Cielo rural-periurbano</string>
-    <string name="bortle_lvl_5">5.Cielo periurbano</string>
-    <string name="bortle_lvl_6">6.Cielo periurbano brillante</string>
-    <string name="bortle_lvl_7">7.Cielo periurbano-urbano</string>
-    <string name="bortle_lvl_8">8.Cielo urbano</string>
-    <string name="bortle_lvl_9">9.Cielo de centro de ciudad</string>
+    <string name="b1">1.Cielo oscuro excelente</string>
+    <string name="b2">2.Cielo oscuro tipico</string>
+    <string name="b3">3.Cielo rural</string>
+    <string name="b4">4.Cielo rural-periurbano</string>
+    <string name="b5">5.Cielo periurbano</string>
+    <string name="b6">6.Cielo periurbano brillante</string>
+    <string name="b7">7.Cielo periurbano-urbano</string>
+    <string name="b8">8.Cielo urbano</string>
+    <string name="b9">9.Cielo de centro de ciudad</string>
     <string name="upload_route">upload route</string>
     <string name="coordenadas">Coordenadas</string>
+    <string name="nombre_del_punto_de_observaci_n">Nombre del punto de observación</string>
+    <string name="contaminaci_n_luminica_en_el_punto">Contaminación luminica en el punto</string>
+    <string name="contaminaci_n_luminica_en_el_rea">Contaminación luminica en el área</string>
+    <string name="nivel_de_accesibilidad">Nivel de accesibilidad</string>
+    <string name="textview">TextView</string>
+    <string name="nombre">Nombre</string>
+    <string name="comentario_del_usuario_creador">Comentario del usuario Creador</string>
+    <string name="ver_lista_de_eventos_para_este_punto">Ver lista de eventos para este punto</string>
+    <string name="calificaci_n">Calificación</string>
+    <string name="report">Report</string>
+    <string name="coordPlace">Latitud:%1$s Longitud:%2$s</string>
+    <string name="dang">aikenkiponlusinyu</string>
+
+
 </resources>

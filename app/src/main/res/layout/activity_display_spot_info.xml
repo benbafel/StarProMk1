@@ -7,24 +7,33 @@
     tools:context=".DisplaySpotInfoActivity">
 
     <com.google.android.gms.maps.MapView
-        android:id="@+id/mapView"
+        android:id="@+id/spotInfoMap"
         android:layout_width="match_parent"
         android:layout_height="202dp"
+        app:layout_constraintBottom_toTopOf="@id/scrollView2"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="SpeakableTextPresentCheck" />
 
+    <Space
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/spotInfoMap" />
+
     <ScrollView
+        android:id="@+id/scrollView2"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/mapView"
-        app:layout_constraintVertical_bias="1.0"
+        app:layout_constraintTop_toBottomOf="@id/spotInfoMap"
         tools:ignore="SpeakableTextPresentCheck">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -38,22 +47,23 @@
                 android:id="@+id/tvCoordenadas"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
                 android:gravity="center_horizontal"
                 android:text="@string/coordenadas"
-                android:textAlignment="viewStart"
+                android:textStyle="bold"
+                android:textColor="#D3D3D3"
+                android:textAlignment="gravity"
                 app:guidelineUseRtl="false"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.551"
+                app:layout_constraintHorizontal_bias="0.517"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/textView14"
                 android:layout_width="161dp"
-                android:layout_height="44dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Nombre del punto de observación"
+                android:text="@string/nombre_del_punto_de_observaci_n"
                 android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tvCoordenadas" />
@@ -63,7 +73,7 @@
                 android:layout_width="159dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Contaminación luminica en el punto"
+                android:text="@string/contaminaci_n_luminica_en_el_punto"
                 android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView14" />
@@ -73,7 +83,7 @@
                 android:layout_width="159dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Contaminación luminica en el área"
+                android:text="@string/contaminaci_n_luminica_en_el_rea"
                 android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView16" />
@@ -83,18 +93,19 @@
                 android:layout_width="159dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Nivel de accesibilidad"
+                android:text="@string/nivel_de_accesibilidad"
                 android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView18" />
 
             <TextView
-                android:id="@+id/textView19"
+                android:id="@+id/tvBortleArea"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:gravity="right"
-                android:text="TextView"
-                android:textSize="16sp"
+                android:text="@string/textview"
+                android:textStyle="bold|italic"
+                android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="@+id/textView18"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -102,12 +113,13 @@
                 app:layout_constraintTop_toTopOf="@+id/textView18" />
 
             <TextView
-                android:id="@+id/textView17"
+                android:id="@+id/tvBortleCenter"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:gravity="right"
-                android:text="TextView"
-                android:textSize="16sp"
+                android:text="@string/textview"
+                android:textStyle="bold|italic"
+                android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="@+id/textView16"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -115,78 +127,150 @@
                 app:layout_constraintTop_toTopOf="@+id/textView16" />
 
             <TextView
-                android:id="@+id/textView15"
+                android:id="@+id/tvSpotName"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:gravity="right"
-                android:text="Nombre"
-                android:textSize="16sp"
+                android:text="@string/nombre"
+                android:textSize="18sp"
+                android:textStyle="bold|italic"
                 app:layout_constraintBottom_toBottomOf="@+id/textView14"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toEndOf="@+id/textView14"
                 app:layout_constraintTop_toTopOf="@+id/textView14" />
 
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/guideline3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                app:layout_constraintGuide_begin="492dp" />
-
             <TextView
-                android:id="@+id/textView22"
+                android:id="@+id/tvAccessibility"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:gravity="right"
-                android:text="TextView"
-                android:textSize="16sp"
+                android:text="@string/textview"
+                android:textStyle="bold|italic"
+                android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="@+id/textView20"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/textView20"
                 app:layout_constraintTop_toTopOf="@+id/textView20" />
 
             <TextView
-                android:id="@+id/textView23"
+                android:id="@+id/textUserComment"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Comentarios..."
+                android:text="@string/comentario_del_usuario_creador"
                 android:textAlignment="viewStart"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/ratingBar" />
+                app:layout_constraintTop_toBottomOf="@+id/rbQual" />
+
+            <TextView
+                android:id="@+id/tvUserComment"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/comentario_del_usuario_creador"
+                android:textAlignment="textStart"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textUserComment" />
 
             <Button
-                android:id="@+id/button"
+                android:id="@+id/btnCreateComment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:gravity="center_horizontal|center_vertical"
-                android:text="Ver lista de eventos para este punto"
+                android:text="Escribir comentario sobre este punto"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView23" />
+                app:layout_constraintTop_toBottomOf="@+id/spnrEvents" />
+
+            <Button
+                android:id="@+id/btnCreateEvent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center_horizontal|center_vertical"
+                android:text="Crear evento en este punto"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.497"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnCreateComment" />
 
             <TextView
                 android:id="@+id/textView24"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                android:text="Calificación"
-                android:textSize="16sp"
+                android:text="@string/calificaci_n"
+                android:textSize="18sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView20" />
 
             <RatingBar
-                android:id="@+id/ratingBar"
+                android:id="@+id/rbQual"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:isIndicator="true"
                 app:layout_constraintBottom_toBottomOf="@+id/textView24"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/textView24"
                 app:layout_constraintTop_toTopOf="@+id/textView24"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <Space
+                android:id="@+id/space"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnReport" />
+
+            <Spinner
+                android:id="@+id/spnrUsersComments"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                android:scrollbarSize="4dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.551"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvUserComment"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <Spinner
+                android:id="@+id/spnrEvents"
+                android:layout_width="380dp"
+                android:layout_height="52dp"
+                android:layout_marginTop="16dp"
+                android:scrollbarSize="4dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.551"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/spnrUsersComments"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <ImageButton
+                android:id="@+id/btnReport"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="16dp"
+                android:background="@color/transparent"
+                android:contentDescription="@string/report"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/btnCreateEvent"
+                app:srcCompat="@android:drawable/ic_dialog_alert"
+                app:tint="@color/quantum_vanillared400"
                 tools:ignore="SpeakableTextPresentCheck" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

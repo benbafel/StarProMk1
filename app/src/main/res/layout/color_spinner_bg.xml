@@ -11,11 +11,11 @@
         android:id="@+id/colorBlob"/>
 
     <TextView
+        android:id="@+id/colorNameBG"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:text="Purple"
         android:textColor="@color/white"
-        android:textSize="20sp"
-        android:gravity="center"
-        android:id="@+id/colorNameBG"/>
+        android:textSize="20sp" />
 </RelativeLayout>

@@ -25,4 +25,5 @@
     <color name="Dificil">#F46608</color>
     <color name="Muy_Dificil">#F10000</color>
     <color name="grey">#CECECD</color>
+    <color name="transparent">#00CECECD</color>
 </resources>

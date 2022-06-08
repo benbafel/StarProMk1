@@ -1,28 +1,22 @@
 package com.benbafel.prototipospots
 
 import android.app.Activity
-import android.app.Dialog
 import android.content.DialogInterface
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.text.Editable
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.benbafel.prototipospots.databinding.ActivityCreateMarkerBinding
 import com.benbafel.prototipospots.models.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.firestore.v1.FirestoreGrpc
 import kotlinx.android.synthetic.main.activity_create_marker.*
-import java.text.DecimalFormat
 import java.util.*
 
 const val EXTRA_PLACE = "EXTRA_SPOT"
-private val df = DecimalFormat("#.#####")
 private const val TAG = "CreateMarkerActivity"
 @Suppress("DEPRECATION")
 class CreateMarkerActivity : AppCompatActivity() {
@@ -30,7 +24,7 @@ class CreateMarkerActivity : AppCompatActivity() {
     lateinit var selectedBortleCenter: ColorObject
     lateinit var selectedBortleArea : ColorObject
     lateinit var selectedAccessibility: ColorObject
-    var spotQlty: Int = 0
+    private var spotQlty: Float = 0f
     var positionCenter :Int? = null
     var positionArea :Int? = null
     var positionAccessibility :Int? = null
@@ -39,16 +33,18 @@ class CreateMarkerActivity : AppCompatActivity() {
     var selectedBortleAreaName: String? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_create_marker)
+
         binding = ActivityCreateMarkerBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        supportActionBar?.title = intent.getStringExtra(EXTRA_CREATE_TITLE)
         
         loadView()
 
         Log.i(TAG, " Intent Crear punto")
         Log.i(TAG, "${intent.getDoubleExtra(EXTRA_LAT,0.00)},${intent.getDoubleExtra(EXTRA_LNG,0.00)}")
 
-        supportActionBar?.title = intent.getStringExtra(EXTRA_CREATE_TITLE)
+
 
         btnAddMrk.setOnClickListener {
 
@@ -214,30 +210,30 @@ class CreateMarkerActivity : AppCompatActivity() {
         }
     }
 
-    private fun setSpotQuality(bortleCenter: Int?,maxBortle: Int?): Int {
+    private fun setSpotQuality(bortleCenter: Int?,maxBortle: Int?): Float {
          when {
             bortleCenter!! <= 2 && maxBortle!! <= 2 -> {
-                spotQlty = 5
+                spotQlty = 5.85935f
                 return spotQlty
             }
             bortleCenter == 3 && maxBortle == 3 -> {
-                spotQlty = 4
+                spotQlty = 4f
                 return spotQlty
             }
             bortleCenter in 4..5 && maxBortle in 4..5 -> {
-                spotQlty = 3
+                spotQlty = 3f
                 return spotQlty
             }
             bortleCenter in 6..7 && maxBortle in 6..7 -> {
-                spotQlty = 2
+                spotQlty = 2f
                 return spotQlty
             }
             bortleCenter in 8..9 && maxBortle in 8..9 -> {
-                spotQlty = 1
+                spotQlty = 1f
                 return spotQlty
             }
              else -> {
-                 return 0
+                 return 0f
              }
         }
     }
