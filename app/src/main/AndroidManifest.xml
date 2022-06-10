@@ -10,12 +10,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat">
         <activity
+            android:name=".DisplayCommentList"
+            android:exported="false" />
+        <activity
             android:name=".DisplaySpotInfoActivity"
             android:exported="false" />
         <activity
             android:name=".CreateMarkerActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

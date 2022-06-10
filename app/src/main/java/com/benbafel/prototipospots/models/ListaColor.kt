@@ -45,7 +45,8 @@ class ListaColor {
     fun accessibilityList():List<ColorObject>{
         return listOf<ColorObject>(
             ColorObject("Elija  Accesibilidad","799FFF",blackHex),
-            ColorObject("Facil","44FF00",blackHex),
+            ColorObject("Muy Facil","44FF00",blackHex),
+            ColorObject("Facil","65D800",blackHex),
             ColorObject("Normal","FFEA00",blackHex),
             ColorObject("Dificil","F46608",blackHex),
             ColorObject("Muy Dificil","F10000",blackHex)

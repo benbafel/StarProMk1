@@ -16,20 +16,28 @@
         <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/drawable/menu_background.xml" value="0.1545" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout-v28/activity_display_spot_info.xml" value="0.27447916666666666" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout/activity_create_marker.xml" value="0.136" />
+        <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout/activity_display_comment_list.xml" value="0.17239583333333333" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout/activity_display_spot_info.xml" value="0.4" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout/activity_example.xml" value="0.264" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout/activity_example_create_user.xml" value="0.264" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout/activity_maps.xml" value="0.27447916666666666" />
+        <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout/activity_spinner.xml" value="0.27447916666666666" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout/alert_spot_object.xml" value="0.1078125" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout/bortle_spinner_bg.xml" value="0.24003623188405798" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout/bortle_spinner_item.xml" value="0.24003623188405798" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout/color_spinner_bg.xml" value="0.176" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout/color_spinner_item.xml" value="0.264" />
+        <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout/comm_spinner_item.xml" value="0.4" />
+        <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout/comment_spinner_bg.xml" value="0.159375" />
+        <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout/comments_recycler.xml" value="0.27447916666666666" />
+        <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout/comments_recycler_item.xml" value="0.264" />
+        <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout/dialog_report_spot.xml" value="0.536" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout/switch_item.xml" value="0.16666666666666666" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/layout/toolbar_info.xml" value="0.152" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/menu/buttons_menu_display_info.xml" value="0.12" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.192" />
         <entry key="..\:/Users/benja/AndroidStudioProjects/PrototipoSpots/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.192" />
+        <entry key="..\:/Users/benja/AppData/Local/Android/Sdk/platforms/android-31/data/res/layout/simple_list_item_1.xml" value="0.27447916666666666" />
       </map>
     </option>
   </component>

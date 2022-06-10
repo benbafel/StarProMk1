@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.benbafel.prototipospots.R.id.map
 import com.benbafel.prototipospots.databinding.ActivityMapsBinding
+import com.benbafel.prototipospots.models.Comment
 import com.benbafel.prototipospots.models.Place
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -129,7 +130,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         // Add a marker in Sydney and move the camera
         val santiago = LatLng(-33.45694, -70.64827)
         //mMap.addMarker(MarkerOptions().position(santiago).title("Santiago"))
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(santiago, 10f), 1000, null)
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(santiago, 10f), 500, null)
 
     }
 
@@ -162,6 +163,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             mMap.addMarker(MarkerOptions().title(place.title).position(latLng).snippet(place.description))
         }
     }
+
 
     private fun getPlaceFromPlaces(markerInfo: Marker) {
         Log.i(TAG,"places is empty = ${places.isEmpty()}")

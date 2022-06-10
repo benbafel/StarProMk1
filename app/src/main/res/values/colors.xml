@@ -20,7 +20,8 @@
     <color name="bortle9">#dd00af</color>
     <color name="cream">#F3F2D2</color>
     <color name="variableColor">#799FFF</color>
-    <color name="Facil">#44FF00</color>
+    <color name="Muy_Facil">#44FF00</color>
+    <color name="Facil">#65D800</color>
     <color name="Normal">#FFEA00</color>
     <color name="Dificil">#F46608</color>
     <color name="Muy_Dificil">#F10000</color>

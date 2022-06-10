@@ -30,6 +30,11 @@
     <string name="report">Report</string>
     <string name="coordPlace">Latitud:%1$s Longitud:%2$s</string>
     <string name="dang">aikenkiponlusinyu</string>
+    <string name="Muy_Facil">Muy Facil</string>
+    <string name="Facil">Facil</string>
+    <string name="Normal">Normal</string>
+    <string name="Dificil">Dificil</string>
+    <string name="Muy_Dificil">Muy Dificil</string>
 
 
 </resources>

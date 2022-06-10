@@ -104,8 +104,8 @@
                 android:layout_height="wrap_content"
                 android:gravity="right"
                 android:text="@string/textview"
+                android:textSize="14sp"
                 android:textStyle="bold|italic"
-                android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="@+id/textView18"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -118,8 +118,8 @@
                 android:layout_height="wrap_content"
                 android:gravity="right"
                 android:text="@string/textview"
+                android:textSize="14sp"
                 android:textStyle="bold|italic"
-                android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="@+id/textView16"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -146,8 +146,8 @@
                 android:layout_height="wrap_content"
                 android:gravity="right"
                 android:text="@string/textview"
+                android:textSize="14sp"
                 android:textStyle="bold|italic"
-                android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="@+id/textView20"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/textView20"
@@ -169,11 +169,14 @@
                 android:id="@+id/tvUserComment"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/color_blob"
+                android:paddingStart="5dp"
                 android:text="@string/comentario_del_usuario_creador"
-                android:textAlignment="textStart"
+                android:textAlignment="viewStart"
                 android:textSize="18sp"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.517"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/textUserComment" />
 
@@ -186,7 +189,7 @@
                 android:text="Escribir comentario sobre este punto"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/spnrEvents" />
+                app:layout_constraintTop_toBottomOf="@+id/btnEvents" />
 
             <Button
                 android:id="@+id/btnCreateEvent"
@@ -215,6 +218,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:isIndicator="true"
+                android:rating="5.00"
+                android:stepSize="0.5"
                 app:layout_constraintBottom_toBottomOf="@+id/textView24"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/textView24"
@@ -231,28 +236,30 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/btnReport" />
 
-            <Spinner
-                android:id="@+id/spnrUsersComments"
+            <Button
+                android:id="@+id/btnUsersComments"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_marginTop="16dp"
                 android:scrollbarSize="4dp"
+                android:text="Comentarios de otros usuarios"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.551"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tvUserComment"
                 tools:ignore="SpeakableTextPresentCheck" />
 
-            <Spinner
-                android:id="@+id/spnrEvents"
-                android:layout_width="380dp"
+            <Button
+                android:id="@+id/btnEvents"
+                android:layout_width="match_parent"
                 android:layout_height="52dp"
+                android:text="Lista de eventos"
                 android:layout_marginTop="16dp"
                 android:scrollbarSize="4dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.551"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/spnrUsersComments"
+                app:layout_constraintTop_toBottomOf="@+id/btnUsersComments"
                 tools:ignore="SpeakableTextPresentCheck" />
 
             <ImageButton

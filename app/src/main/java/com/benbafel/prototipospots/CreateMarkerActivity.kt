@@ -81,7 +81,7 @@ class CreateMarkerActivity : AppCompatActivity() {
                     val bortleCenterSpot = positionCenter
                     val borleAreaSpot = positionArea
                     val accessibilitySpot = positionAccessibility
-                    val spotQuality = setSpotQuality(bortleCenterSpot,borleAreaSpot)
+                    val spotQuality = setSpotQuality(bortleCenterSpot,borleAreaSpot,accessibilitySpot)
                     val spot = Spot(
                         spotId,
                         spotName,
@@ -93,7 +93,6 @@ class CreateMarkerActivity : AppCompatActivity() {
                         borleAreaSpot,
                         accessibilitySpot,
                         spotQuality)
-                    //Check if spot exists
                     db.collection("spots").document(spotId)
                         .set(spot)
                         .addOnSuccessListener {
@@ -210,32 +209,36 @@ class CreateMarkerActivity : AppCompatActivity() {
         }
     }
 
-    private fun setSpotQuality(bortleCenter: Int?,maxBortle: Int?): Float {
+    private fun setSpotQuality(bortleCenter: Int?, maxBortle: Int?, accessibilitySpot: Int?): Float {
+
          when {
-            bortleCenter!! <= 2 && maxBortle!! <= 2 -> {
-                spotQlty = 5.85935f
-                return spotQlty
+            bortleCenter!! < 2 -> {
+                spotQlty = 4.9f
             }
-            bortleCenter == 3 && maxBortle == 3 -> {
-                spotQlty = 4f
-                return spotQlty
+            bortleCenter == 2 -> {
+                spotQlty = 4.1f
+
             }
-            bortleCenter in 4..5 && maxBortle in 4..5 -> {
-                spotQlty = 3f
-                return spotQlty
+            bortleCenter in 4..5  -> {
+                spotQlty = 3.1f
+
             }
-            bortleCenter in 6..7 && maxBortle in 6..7 -> {
-                spotQlty = 2f
-                return spotQlty
+            bortleCenter == 6 -> {
+                spotQlty = 2.90f
+
             }
-            bortleCenter in 8..9 && maxBortle in 8..9 -> {
-                spotQlty = 1f
-                return spotQlty
+            bortleCenter == 7 -> {
+                spotQlty = 2.4f
             }
-             else -> {
-                 return 0f
+             bortleCenter == 8 -> {
+                 spotQlty = 1.9f
              }
+             else -> {
+                 return 1.1f
+             }
+
         }
+        return spotQlty
     }
     /* private fun fillLatLng() {
          val latLng=intent.getSerializableExtra() as LatLng
