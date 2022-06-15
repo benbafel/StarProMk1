@@ -5,7 +5,6 @@ package com.benbafel.prototipospots
 import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
@@ -13,8 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.benbafel.prototipospots.R.id.map
 import com.benbafel.prototipospots.databinding.ActivityMapsBinding
-import com.benbafel.prototipospots.models.Comment
 import com.benbafel.prototipospots.models.Place
+import com.benbafel.prototipospots.models.User
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -23,8 +22,11 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.delay
 import java.text.DecimalFormat
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -44,6 +46,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var binding: ActivityMapsBinding
     private val places: MutableList<Place> = mutableListOf()
     private val df = DecimalFormat("#.####")
+    private lateinit var userData :User
+    private lateinit var userEmail: String
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +56,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        userEmail = intent.getStringExtra(EXTRA_USER_MAIL) as String
+        getUserData(userEmail)
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager.findFragmentById(map) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -75,6 +81,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      * installed Google Play services and returned to the app.
      */
     override fun onMapReady(googleMap: GoogleMap) {
+
         mMap = googleMap
         //val  spots : MutableList<Spot> = mutableListOf()
 
@@ -94,22 +101,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             mMap.animateCamera(CameraUpdateFactory.newLatLng(marker.position),600,null)
             when {
                 (lastMarkerPosition == marker.position && infoShown) -> {//V : V = F
-                    Log.i(TAG, "hide same point")
                     marker.hideInfoWindow()
                     infoShown = !infoShown
                 }
                 lastMarkerPosition == marker.position && !infoShown -> {
-                    Log.i(TAG, "show same point")
                     marker.showInfoWindow()
                     infoShown = !infoShown
                 }
                 lastMarkerPosition != marker.position && infoShown -> {//F : V = V
-                    Log.i(TAG, "show different point, infoShown")
                     marker.showInfoWindow()
                     lastMarkerPosition = marker.position
                 }
                 else -> {//F : F = V
-                    Log.i(TAG, "show different point, Not InfoShown")
                     marker.showInfoWindow()
                     lastMarkerPosition = marker.position
                     infoShown = !infoShown
@@ -134,11 +137,34 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     }
 
+    private fun getUserData(userEmail: String) {
+        val db = Firebase.firestore
+        db.collection("users").document(userEmail)
+            .get()
+            .addOnSuccessListener { snapshot->
+                userData = setUserData(snapshot)
+                Log.i(TAG,"user data = $userData")
+            }
+            .addOnFailureListener{ exception ->
+                Log.i(TAG, "Error getting user documents: ", exception)
+            }
+    }
+
+    private fun setUserData(snapshot: DocumentSnapshot?): User {
+        val docData = snapshot!!.data
+        val userName = docData!!["name"] as String
+        val userEmail = docData["email"] as String
+        val userExpertise = docData["expertise"] as String
+        val userInterests = (docData["areasOfInterest"] as Long).toInt()
+        return User(userName,userEmail,userInterests,userExpertise)
+
+    }
+
     private fun closeToMarker(latLng: LatLng): Boolean {
         for (place in places) {
-            val dist = df.format(calculaDist(latLng, place.latitude, place.longitude)).toDouble()
+            val dist = /*df.format(*/calculaDist(latLng, place.latitude, place.longitude)//.toDouble()
             Log.i(TAG, "dist = $dist to ${place.description}")
-            if (dist < 0.0122) {
+            if (dist < 0.0422) {
                 actualPlace = place
                 return true
             }
@@ -146,7 +172,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         return false
     }
 
-    private fun calculaDist(latLng: LatLng, x2: Double, y2: Double): Any {
+    private fun calculaDist(latLng: LatLng, x2: Double, y2: Double): Double {
         val x1 = latLng.latitude
         val y1 = latLng.longitude
         val restX = (x2 - x1).pow(2)
@@ -228,7 +254,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }else{
             Log.i(TAG,"actual place = ${actualPlace?.description}")
-
             val dialog =
                 AlertDialog.Builder(this)
                     .setTitle("CUIDADO")

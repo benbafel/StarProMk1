@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Prototipo Spots</string>
+    <string name="app_name">Star Pro</string>
     <string name="title_activity_maps">MapsActivity</string>
     <string name="recomendation">Para registrar la escala de Bortle se recomienda utilizar la aplicacion Light Pollution Map.\nPara aprender como usar esta aplicacion para medir el nivel de bortle, haga clic aqui</string>
     <string name="info2">INFO ACCESIBILIDAD</string>
@@ -35,6 +35,16 @@
     <string name="Normal">Normal</string>
     <string name="Dificil">Dificil</string>
     <string name="Muy_Dificil">Muy Dificil</string>
-
-
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
+    <string name="aficionado">"Aficionado"</string>
+    <string name="intermedio">"Intermedio"</string>
+    <string name="avanzado">"Avanzado"</string>
 </resources>

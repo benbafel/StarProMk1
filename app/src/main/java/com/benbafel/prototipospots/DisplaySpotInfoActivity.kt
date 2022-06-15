@@ -38,7 +38,6 @@ class DisplaySpotInfoActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var place: Place
     private lateinit var spot: Spot
     private  var commList = mutableListOf<Comment>()
-    private lateinit var commAdapter: CommentAdapter
     private val df = DecimalFormat("#.####")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -145,7 +144,7 @@ class DisplaySpotInfoActivity : AppCompatActivity(), OnMapReadyCallback {
             .addOnSuccessListener { document ->
                 if (document != null) {
                     Log.i(TAG, " log 1 = ${document.id} => ${document.data}")
-                    llenarSpot(document.data,db)
+                    llenarSpot(document.data)
                 } else {
                     Log.i(TAG, "No such document")
                 }
@@ -160,7 +159,7 @@ class DisplaySpotInfoActivity : AppCompatActivity(), OnMapReadyCallback {
         startActivityForResult(myIntent, 0)
         return true
     }
-    private fun llenarSpot(data: Map<String, Any>?, db: FirebaseFirestore)  {
+    private fun llenarSpot(data: Map<String, Any>?)  {
         val id = place.id
         val name = place.title
         val description =  place.description
@@ -180,7 +179,6 @@ class DisplaySpotInfoActivity : AppCompatActivity(), OnMapReadyCallback {
         rbQual.rating = spotQuality
         insertBortleValViews(bortleCenter,maxBortle)
         fillAccessibilityView(accesibility,tvAccessibility)
-        //getComments("0d31ef63-660f-4e8f-b018-55ce32f88640",db)
 
         return
     }

@@ -4,8 +4,6 @@ import android.provider.ContactsContract
 
 data class User(var name: String?,
                 var email: String,
-                private var password: String,
-                var areasOfInterest: List<String>,
-                var expertise: String,
-                var notifications: Boolean,
+                var areasOfInterest: Int,
+                var expertise: String
 )

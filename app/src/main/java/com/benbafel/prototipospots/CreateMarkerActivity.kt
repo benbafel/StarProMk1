@@ -240,11 +240,6 @@ class CreateMarkerActivity : AppCompatActivity() {
         }
         return spotQlty
     }
-    /* private fun fillLatLng() {
-         val latLng=intent.getSerializableExtra() as LatLng
-         val text = "Coordenadas:Latitud:${latLng.latitude}Longitud=${latLng.longitude}"
-
-     }*/
 
 }
 
