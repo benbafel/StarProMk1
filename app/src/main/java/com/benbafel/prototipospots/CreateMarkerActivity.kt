@@ -1,19 +1,21 @@
 package com.benbafel.prototipospots
 
 import android.app.Activity
-import android.content.DialogInterface
-import android.content.Intent
+import android.content.*
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.AdapterView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.benbafel.prototipospots.databinding.ActivityCreateMarkerBinding
 import com.benbafel.prototipospots.models.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_create_marker.*
+import java.text.DecimalFormat
 import java.util.*
 
 const val EXTRA_PLACE = "EXTRA_SPOT"
@@ -24,6 +26,7 @@ class CreateMarkerActivity : AppCompatActivity() {
     lateinit var selectedBortleCenter: ColorObject
     lateinit var selectedBortleArea : ColorObject
     lateinit var selectedAccessibility: ColorObject
+    lateinit var user: User
     private var spotQlty: Float = 0f
     var positionCenter :Int? = null
     var positionArea :Int? = null
@@ -31,6 +34,7 @@ class CreateMarkerActivity : AppCompatActivity() {
     var selectedBortleCenterName: String? = null
     var selectedAccessibilityName: String? = null
     var selectedBortleAreaName: String? = null
+    private val df = DecimalFormat("#.####")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -38,13 +42,20 @@ class CreateMarkerActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         supportActionBar?.title = intent.getStringExtra(EXTRA_CREATE_TITLE)
-        
+
+        user = intent.getSerializableExtra(EXTRA_USER) as User
+        Log.i(TAG,"user: $user")
         loadView()
 
-        Log.i(TAG, " Intent Crear punto")
-        Log.i(TAG, "${intent.getDoubleExtra(EXTRA_LAT,0.00)},${intent.getDoubleExtra(EXTRA_LNG,0.00)}")
 
+        Log.i(TAG, "coordenadas ${intent.getDoubleExtra(EXTRA_LAT,0.00)},${intent.getDoubleExtra(EXTRA_LNG,0.00)}")
 
+        ibBortle.setOnClickListener{
+            showBortleExplain()
+        }
+        ibAccessibily.setOnClickListener{
+            showAccesibilityExplain()
+        }
 
         btnAddMrk.setOnClickListener {
 
@@ -53,10 +64,49 @@ class CreateMarkerActivity : AppCompatActivity() {
         }
     }
 
+    private fun showAccesibilityExplain() {
+        val dialog =
+            AlertDialog.Builder(this)
+                .setTitle("Accesibilidad")
+                .setMessage(getString(R.string.access_explain))
+                .setPositiveButton("Ok",null)
+                .show()
+
+    }
+
+    private fun showBortleExplain() {
+        val lat = intent.getDoubleExtra(EXTRA_LAT,0.00)
+        val lng = intent.getDoubleExtra(EXTRA_LNG,0.00)
+        val latLngString = "$lat,$lng"
+
+        val dialogFormView = LayoutInflater.from(this).inflate(R.layout.bortle_explain_1,null)
+        val dialog =
+            AlertDialog.Builder(this)
+                .setView(dialogFormView)
+                .setNegativeButton("Coordenadas",null)
+                .setPositiveButton("Aceptar",null)
+                .show()
+        dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setOnClickListener {
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("Texto Copiado",latLngString)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(this,"Texto Copiado",Toast.LENGTH_LONG).show()
+        }
+
+    }
+
     private fun loadView() {
+        loadLatLng()
         loadAccessibilitySpinner()
         loadBortleCenterSpinner()
         loadBortleAreaSpinner()
+    }
+
+    private fun loadLatLng() {
+        val lat = df.format(intent.getDoubleExtra(EXTRA_LAT,0.00))
+        val lng = df.format(intent.getDoubleExtra(EXTRA_LNG,0.00))
+        val latLngString = "coordenadas: $lat,$lng"
+        tvLatLng.text = latLngString
     }
 
     private fun saveSpot() {
@@ -72,10 +122,10 @@ class CreateMarkerActivity : AppCompatActivity() {
                 dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
                     val db = Firebase.firestore
                     val spotId = UUID.randomUUID().toString()
-                    val spotName = "punto de prueba"
+                    val spotName = etSpotName.text.toString()
                     val descChar = etCommentary.text as CharSequence
                     val description = removeNewLine(descChar).toString()
-                    val spotUser = "benbafel"
+                    val spotUser = user.name
                     val lat = intent.getDoubleExtra(EXTRA_LAT,0.00)
                     val lng = intent.getDoubleExtra(EXTRA_LNG,0.00)
                     val bortleCenterSpot = positionCenter
@@ -107,10 +157,12 @@ class CreateMarkerActivity : AppCompatActivity() {
                             dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
                                 val data = Intent()
                                 val place = Place(spotId,spot.name,spot.description,spot.lat,spot.lng)
+                                data.putExtra(EXTRA_USER_MAIL,user.email)
                                 data.putExtra(EXTRA_PLACE,place)
                                 setResult(Activity.RESULT_OK,data)
                                 finish()
                             }
+
 
                         }
                         .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
@@ -143,7 +195,8 @@ class CreateMarkerActivity : AppCompatActivity() {
         return (positionAccessibility != null
                 && positionCenter != null
                 && positionArea != null
-                && etCommentary.text.trim().isNotEmpty())
+                && etCommentary.text.trim().isNotEmpty()
+                && etSpotName.text.trim().isNotEmpty())
         }
 
     private fun loadAccessibilitySpinner() {

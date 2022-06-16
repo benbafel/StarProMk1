@@ -1,7 +1,9 @@
 package com.benbafel.prototipospots
 
+import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
@@ -11,7 +13,11 @@ import android.util.Patterns
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
 import com.benbafel.prototipospots.databinding.ActivityLoginBinding
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -25,10 +31,13 @@ private const val TAG = "LoginActivity"
 const val EXTRA_USER_MAIL = "EXTRA_USER_MAIL"
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
+    private lateinit var  fusedLocationProviderClient: FusedLocationProviderClient
+    @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         emailTextChange()
         registerButton.setOnClickListener {
             val intent = Intent(this@LoginActivity, RegisterActivity::class.java)
@@ -37,6 +46,18 @@ class LoginActivity : AppCompatActivity() {
         loginButton.setOnClickListener {
             when (viewsAreFilled()){
                 true ->{
+                    if (ActivityCompat
+                            .checkSelfPermission(this, android.Manifest.permission
+                                .ACCESS_FINE_LOCATION) != PackageManager
+                            .PERMISSION_GRANTED && ActivityCompat
+                            .checkSelfPermission(this,android.Manifest
+                                .permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED){
+                            Toast.makeText(this,"Debe dar permisos de ubicación a la aplicación",
+                                Toast.LENGTH_LONG).show()
+                        ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),101)
+                        return@setOnClickListener
+                    }
                     val userEmail = etLoginEmail.text.trim().toString()
                     val userPassword = etLoginPassword.text.toString()
                     Firebase.auth.signInWithEmailAndPassword(userEmail,userPassword)

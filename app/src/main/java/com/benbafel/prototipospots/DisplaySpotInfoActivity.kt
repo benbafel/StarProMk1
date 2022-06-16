@@ -37,6 +37,7 @@ class DisplaySpotInfoActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var vMap : MapView
     private lateinit var place: Place
     private lateinit var spot: Spot
+    private lateinit var user: User
     private  var commList = mutableListOf<Comment>()
     private val df = DecimalFormat("#.####")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,6 +49,8 @@ class DisplaySpotInfoActivity : AppCompatActivity(), OnMapReadyCallback {
         vMap.getMapAsync(this)
         vMap.onCreate(savedInstanceState)
         place = intent.getSerializableExtra(EXTRA_PLACE) as Place
+        user = intent.getSerializableExtra(EXTRA_USER) as User
+        Log.i(TAG,"USER MAIL = ${user.email}")
         supportActionBar?.title = intent.getStringExtra(EXTRA_SPOT_INFO_TITLE)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         btnReport.setOnClickListener{
@@ -156,6 +159,7 @@ class DisplaySpotInfoActivity : AppCompatActivity(), OnMapReadyCallback {
     @Suppress("DEPRECATION")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val myIntent = Intent(applicationContext, MapsActivity::class.java)
+        myIntent.putExtra(EXTRA_USER_MAIL,user.email)
         startActivityForResult(myIntent, 0)
         return true
     }

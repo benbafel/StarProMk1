@@ -1,7 +1,22 @@
 <resources>
     <string name="app_name">Star Pro</string>
     <string name="title_activity_maps">MapsActivity</string>
-    <string name="recomendation">Para registrar la escala de Bortle se recomienda utilizar la aplicacion Light Pollution Map.\nPara aprender como usar esta aplicacion para medir el nivel de bortle, haga clic aqui</string>
+    <string name="recomendation">Para registrar la escala de Bortle se recomienda utilizar la
+        aplicacion Light Pollution Map.\nPara aprender como usar esta aplicación, siga los pasos descritos
+    en el boton de información</string>
+    <string name="access_explain">Muy facil: Se puede acceder facilmente en todos los medios de
+        transporte.Se puede llevar equipo de gran envergadura.\n\n
+    Facil: Se puede acceder sin mayores problemas en todo tipo de transporte privado.El terreno permite
+    equipo grande, pero puede ser que no este nivelado.\n\n
+    Normal: Solo transportes de tracción 4x4 pueden acceder, pero tambien se puede en bicicleta.
+        El equipo queda a discreción del medio de transporte y su capacidad.\n\n
+    Dificil: no cuenta con acceso en vehiculos más grandes que una bicicleta. El tamaño del equipo queda
+     limitado por su porte y peso, lo que el observador pueda cargar.\n\n
+    Muy dificil: El terreno de la ruta es de senderismo, con piedras sueltas, limitando su acceso a solo medio de pie. El
+    equipo, por consiguiente, puede ser pequeño, pero se aconseja precaución, ya que el equipo se puede
+    dañar en el trayecto.\n\n
+    Si sientes que el acceso no entra en ninguna de estas categorias, se recomienda que elijas la que
+    más se acerque, y complementes en la sección de comentario.</string>
     <string name="info2">INFO ACCESIBILIDAD</string>
     <string name="info">INFO BORTLE</string>
     <string name="escala_de_bortle">Escala de Bortle</string>
@@ -47,4 +62,5 @@
     <string name="aficionado">"Aficionado"</string>
     <string name="intermedio">"Intermedio"</string>
     <string name="avanzado">"Avanzado"</string>
+    <string name="bortle_explain_1_txt">Primero, debe descargar la aplicación\n\"Light Pollution Map\"</string>
 </resources>

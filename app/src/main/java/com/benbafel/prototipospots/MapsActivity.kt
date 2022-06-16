@@ -2,6 +2,7 @@
 
 package com.benbafel.prototipospots
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
@@ -14,17 +15,19 @@ import com.benbafel.prototipospots.R.id.map
 import com.benbafel.prototipospots.databinding.ActivityMapsBinding
 import com.benbafel.prototipospots.models.Place
 import com.benbafel.prototipospots.models.User
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.delay
 import java.text.DecimalFormat
@@ -36,18 +39,22 @@ const val EXTRA_CREATE_TITLE = "EXTRA_CREATE_TITLE"
 const val REQUEST_CODE = 1234
 const val EXTRA_LAT = "EXTRA_LAT"
 const val EXTRA_LNG = "EXTRA_LNG"
+const val EXTRA_USER = "EXTRA_USER"
+const val EXTRA_USER_NAME = "EXTRA_USER_NAME"
 private const val TAG = "MapsActivity"
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var infoShown: Boolean = true
     private var actualPlace: Place? = null
     private var lastMarkerPosition = LatLng(-0.00, -0.00)
     private lateinit var mMap: GoogleMap
+    private lateinit var  fusedLocationProviderClient: FusedLocationProviderClient
     private var markers: MutableList<Marker> = mutableListOf()
     private lateinit var binding: ActivityMapsBinding
     private val places: MutableList<Place> = mutableListOf()
     private val df = DecimalFormat("#.####")
     private lateinit var userData :User
     private lateinit var userEmail: String
+    private lateinit var userLocation: LatLng
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,14 +62,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
-        userEmail = intent.getStringExtra(EXTRA_USER_MAIL) as String
-        getUserData(userEmail)
+
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager.findFragmentById(map) as SupportMapFragment
         mapFragment.getMapAsync(this)
         mapFragment.view?.let {
-            Snackbar.make(it, "Long press to add a marker!", Snackbar.LENGTH_INDEFINITE)
+            Snackbar.make(it, "Mantenga presionado para añadir un marcador!", Snackbar.LENGTH_INDEFINITE)
                 .setAction("Ok") {}
                 .setActionTextColor(ContextCompat.getColor(this, android.R.color.holo_green_light))
                 .show()
@@ -70,17 +78,31 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     }
 
+    @SuppressLint("MissingPermission")
+    private fun fetchLocationPermission() {
+        val task = fusedLocationProviderClient.lastLocation
+        task.addOnSuccessListener {
+            if(it != null){
+                 userLocation = LatLng(it.latitude,it.longitude)
+                    Log.i(TAG,"VAL LOC: ${userLocation.toString()}")
+                    mMap.addMarker(MarkerOptions().title("Ubicación del usuario").position(userLocation).snippet("Usted esta aquí (o cerca)")
+                        .icon(BitmapDescriptorFactory.defaultMarker(180f)))
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 10f))
+            }else{
+                mMap.addMarker(MarkerOptions().title("Ubicación predeterminada").position(userLocation).snippet("Tiene su ubicación desactivada")
+                    .icon(BitmapDescriptorFactory.defaultMarker(180f)))
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 10f))
+            }
+        }
+    }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     override fun onMapReady(googleMap: GoogleMap) {
+        userLocation = LatLng(-33.45694, -70.64827)
+        fetchLocationPermission()
+
+        userEmail = intent.getStringExtra(EXTRA_USER_MAIL) as String
+        getUserData(userEmail)
+
 
         mMap = googleMap
         //val  spots : MutableList<Spot> = mutableListOf()
@@ -88,7 +110,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //Carga puntos en una lista mutable
         loadSpots(mMap)
         //llena el mapa con los puntos cargados
-        loadMarkers()
+        //loadMarkers()
         mMap.setOnMapLongClickListener {  latLng ->
             Log.i(TAG,"setOnMapLongClickListener")
             crearNuevoSpot(latLng)
@@ -125,15 +147,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         mMap.setOnInfoWindowClickListener { markerInfo ->
             Log.i(TAG, "OnInfoWindowClickListener")
+            if(markerInfo.position != userLocation){
+                getPlaceFromPlaces(markerInfo)
+            }else{
+                return@setOnInfoWindowClickListener
+            }
 
-            getPlaceFromPlaces(markerInfo)
         }
-
-
-        // Add a marker in Sydney and move the camera
-        val santiago = LatLng(-33.45694, -70.64827)
-        //mMap.addMarker(MarkerOptions().position(santiago).title("Santiago"))
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(santiago, 10f), 500, null)
 
     }
 
@@ -143,7 +163,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             .get()
             .addOnSuccessListener { snapshot->
                 userData = setUserData(snapshot)
-                Log.i(TAG,"user data = $userData")
+                Log.i(TAG,"user data loaded outside. $userData")
             }
             .addOnFailureListener{ exception ->
                 Log.i(TAG, "Error getting user documents: ", exception)
@@ -180,15 +200,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         return sqrt(restX + restY)
     }
 
-    private fun loadMarkers() {
-        for (place in places){
-            val lat = place.latitude
-            val lng = place.longitude
-            val latLng = LatLng(lat,lng)
-
-            mMap.addMarker(MarkerOptions().title(place.title).position(latLng).snippet(place.description))
-        }
-    }
+    //private fun loadMarkers() {
+    //    for (place in places){
+    //        val lat = place.latitude
+    //        val lng = place.longitude
+    //        val latLng = LatLng(lat,lng)
+    //
+    //        mMap.addMarker(MarkerOptions().title(place.title).position(latLng).snippet())
+    //    }
+    //}
 
 
     private fun getPlaceFromPlaces(markerInfo: Marker) {
@@ -211,7 +231,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     .addOnSuccessListener { result ->
                         for (document in result){
                             val intent = Intent(this@MapsActivity, DisplaySpotInfoActivity::class.java)
-
+                            intent.putExtra(EXTRA_USER,userData)
                             intent.putExtra(EXTRA_PLACE,actualPlace)
                             intent.putExtra(EXTRA_SPOT_INFO_TITLE, "${place.title}")
                             startActivity(intent)
@@ -246,6 +266,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 val intent = Intent(this@MapsActivity, CreateMarkerActivity::class.java)
                 val lat = latLng.latitude
                 val lng = latLng.longitude
+                intent.putExtra(EXTRA_USER,userData)
                 intent.putExtra(EXTRA_LAT, lat)
                 intent.putExtra(EXTRA_LNG, lng)
                 intent.putExtra(EXTRA_CREATE_TITLE, "Crear punto de observación")
@@ -303,7 +324,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     val latLng = LatLng(lat, lng)
                     mMap.addMarker(
                         MarkerOptions().title(place.title).position(latLng)
-                            .snippet(place.description)
+                            .snippet("Ver datos del punto")
                     )
                 }
 
@@ -319,7 +340,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val newSpot = data?.getSerializableExtra(EXTRA_PLACE) as Place
             val latLng = LatLng(newSpot.latitude,newSpot.longitude)
             places.add(newSpot)
-            mMap.addMarker(MarkerOptions().title(newSpot.title).position(latLng).snippet(newSpot.description))
+            mMap.addMarker(MarkerOptions().title(newSpot.title).position(latLng).snippet("Ver datos del punto"))
             Log.i(TAG, "onActivityResult with new map title ${newSpot.title}")
         }
         super.onActivityResult(requestCode, resultCode, data)
