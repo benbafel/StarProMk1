@@ -63,4 +63,6 @@
     <string name="intermedio">"Intermedio"</string>
     <string name="avanzado">"Avanzado"</string>
     <string name="bortle_explain_1_txt">Primero, debe descargar la aplicación\n\"Light Pollution Map\"</string>
+    <string name="aceptar">Aceptar</string>
+    <string name="modify_mark_button">Modificar punto de observacion</string>
 </resources>

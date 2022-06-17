@@ -9,6 +9,24 @@ class ListaColor {
     val defaultColorBortle: ColorObject = bortleList()[0]
     val defaultColorAccessibility: ColorObject = accessibilityList()[0]
 
+    fun objetoEnListaAccessibilidad(pos: Int?): ColorObject {
+        for (i in accessibilityList().indices)
+        {
+            if (pos == i)
+                return accessibilityList()[i]
+        }
+        return defaultColorAccessibility
+    }
+
+    fun objetoEnListaBortle(pos: Int?): ColorObject {
+        for (i in bortleList().indices)
+        {
+            if (pos == i)
+                return bortleList()[i]
+        }
+        return defaultColorBortle
+    }
+
     fun posicionEnListaBortle(colorObject: ColorObject): Int{
         for (i in bortleList().indices)
         {
@@ -27,7 +45,6 @@ class ListaColor {
     }
 
     fun bortleList() :List<ColorObject>{
-
         return listOf<ColorObject>(
             ColorObject("Elija nivel de luminosidad","799FFF",blackHex),
             ColorObject("1.Cielo oscuro excelente","FF000000",whiteHex),

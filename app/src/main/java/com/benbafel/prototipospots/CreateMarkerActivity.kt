@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Toast
@@ -18,16 +20,19 @@ import kotlinx.android.synthetic.main.activity_create_marker.*
 import java.text.DecimalFormat
 import java.util.*
 
-const val EXTRA_PLACE = "EXTRA_SPOT"
+const val EXTRA_PLACE = "EXTRA_PLACE"
+const val EXTRA_MODIFIED_PLACE = "EXTRA_MODIFIED_PLACE"
 private const val TAG = "CreateMarkerActivity"
 @Suppress("DEPRECATION")
 class CreateMarkerActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCreateMarkerBinding
+    private lateinit var spot: Spot
     lateinit var selectedBortleCenter: ColorObject
     lateinit var selectedBortleArea : ColorObject
     lateinit var selectedAccessibility: ColorObject
-    lateinit var user: User
+    private lateinit var user: User
     private var spotQlty: Float = 0f
+    private var parent = -1
     var positionCenter :Int? = null
     var positionArea :Int? = null
     var positionAccessibility :Int? = null
@@ -42,8 +47,13 @@ class CreateMarkerActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         supportActionBar?.title = intent.getStringExtra(EXTRA_CREATE_TITLE)
-
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        parent = intent.getIntExtra(PARENT,-1)
         user = intent.getSerializableExtra(EXTRA_USER) as User
+        if(parent == 2){
+            spot = intent.getSerializableExtra(EXTRA_MODIFY_SPOT) as Spot
+            Log.i(TAG, "se cargo la wea de spot.")
+        }
         Log.i(TAG,"user: $user")
         loadView()
 
@@ -100,6 +110,13 @@ class CreateMarkerActivity : AppCompatActivity() {
         loadAccessibilitySpinner()
         loadBortleCenterSpinner()
         loadBortleAreaSpinner()
+        if(parent == 2){
+            val spotName = spot.name
+            val spotComment = spot.description
+            etSpotName.setText(spotName)
+            etCommentary.setText(spotComment)
+            btnAddMrk.text = getString(R.string.modify_mark_button)
+        }
     }
 
     private fun loadLatLng() {
@@ -112,61 +129,128 @@ class CreateMarkerActivity : AppCompatActivity() {
     private fun saveSpot() {
         when {
             viewsRfull() -> {
-                var dialog =
-                    AlertDialog.Builder(this)
-                        .setTitle("Crear nuevo punto de observación")
-                        .setMessage("Estas seguro que deseas crear un punto nuevo?")
-                        .setPositiveButton("Estoy seguro", null)
-                        .setNegativeButton("Cancelar",null)
-                        .show()
-                dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
-                    val db = Firebase.firestore
-                    val spotId = UUID.randomUUID().toString()
-                    val spotName = etSpotName.text.toString()
-                    val descChar = etCommentary.text as CharSequence
-                    val description = removeNewLine(descChar).toString()
-                    val spotUser = user.name
-                    val lat = intent.getDoubleExtra(EXTRA_LAT,0.00)
-                    val lng = intent.getDoubleExtra(EXTRA_LNG,0.00)
-                    val bortleCenterSpot = positionCenter
-                    val borleAreaSpot = positionArea
-                    val accessibilitySpot = positionAccessibility
-                    val spotQuality = setSpotQuality(bortleCenterSpot,borleAreaSpot,accessibilitySpot)
-                    val spot = Spot(
-                        spotId,
-                        spotName,
-                        description,
-                        spotUser,
-                        lat,
-                        lng,
-                        bortleCenterSpot,
-                        borleAreaSpot,
-                        accessibilitySpot,
-                        spotQuality)
-                    db.collection("spots").document(spotId)
-                        .set(spot)
-                        .addOnSuccessListener {
-                            Log.d(TAG, "DocumentSnapshot successfully written!")
-                            dialog.dismiss()
-                            dialog =
-                                AlertDialog.Builder(this)
-                                    .setTitle("Punto creado")
-                                    .setMessage("Se ha creado el punto exitosamente")
-                                    .setPositiveButton("Ok", null)
-                                    .show()
-                            dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
-                                val data = Intent()
-                                val place = Place(spotId,spot.name,spot.description,spot.lat,spot.lng)
-                                data.putExtra(EXTRA_USER_MAIL,user.email)
-                                data.putExtra(EXTRA_PLACE,place)
-                                setResult(Activity.RESULT_OK,data)
-                                finish()
-                            }
+                when(parent){
+                    1 ->{
+                        var dialog =
+                            AlertDialog.Builder(this)
+                                .setTitle("Crear nuevo punto de observación")
+                                .setMessage("Estas seguro que deseas crear un punto nuevo?")
+                                .setPositiveButton("Estoy seguro", null)
+                                .setNegativeButton("Cancelar",null)
+                                .show()
+                        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                            val db = Firebase.firestore
+                            val spotId = UUID.randomUUID().toString()
+                            val spotName = etSpotName.text.toString()
+                            val descChar = etCommentary.text as CharSequence
+                            val description = removeNewLine(descChar).toString()
+                            val spotUser = user.name
+                            val lat = intent.getDoubleExtra(EXTRA_LAT,0.00)
+                            val lng = intent.getDoubleExtra(EXTRA_LNG,0.00)
+                            val bortleCenterSpot = positionCenter
+                            val borleAreaSpot = positionArea
+                            val accessibilitySpot = positionAccessibility
+                            val spotQuality = setSpotQuality(bortleCenterSpot,borleAreaSpot,accessibilitySpot)
+                            spot = Spot(
+                                spotId,
+                                spotName,
+                                description,
+                                spotUser,
+                                lat,
+                                lng,
+                                bortleCenterSpot,
+                                borleAreaSpot,
+                                accessibilitySpot,
+                                spotQuality)
+                            db.collection("spots").document(spotId)
+                                .set(spot)
+                                .addOnSuccessListener {
+                                    Log.d(TAG, "DocumentSnapshot successfully written!")
+                                    dialog.dismiss()
+                                    dialog =
+                                        AlertDialog.Builder(this)
+                                            .setTitle("Punto creado")
+                                            .setMessage("Se ha creado el punto exitosamente")
+                                            .setPositiveButton("Ok", null)
+                                            .show()
+                                    dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                                        val data = Intent()
+                                        val place = Place(spotId,spot.name,spot.description,spot.lat,spot.lng)
+                                        data.putExtra(EXTRA_USER_MAIL,user.email)
+                                        data.putExtra(EXTRA_PLACE,place)
+                                        setResult(Activity.RESULT_OK,data)
+                                        dialog.dismiss()
+                                        startActivity(intent)
+                                        finish()
+                                    }
 
 
+                                }
+                                .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
                         }
-                        .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
+                    }
+                    2 ->{
+                        var dialog =
+                            AlertDialog.Builder(this)
+                                .setTitle("Modificar punto de observación")
+                                .setMessage("Estas seguro que desea modificar este punto?")
+                                .setPositiveButton("Estoy seguro", null)
+                                .setNegativeButton("Cancelar",null)
+                                .show()
+                        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                            val db = Firebase.firestore
+                            val spotId = spot.id
+                            val spotName = etSpotName.text.toString()
+                            val descChar = etCommentary.text as CharSequence
+                            val description = removeNewLine(descChar).toString()
+                            val spotUser = user.name
+                            val lat = spot.lat
+                            val lng = spot.lng
+                            val bortleCenterSpot = positionCenter
+                            val borleAreaSpot = positionArea
+                            val accessibilitySpot = positionAccessibility
+                            val spotQuality = setSpotQuality(bortleCenterSpot,borleAreaSpot,accessibilitySpot)
+                            val punto = Spot(
+                                spotId,
+                                spotName,
+                                description,
+                                spotUser,
+                                lat,
+                                lng,
+                                bortleCenterSpot,
+                                borleAreaSpot,
+                                accessibilitySpot,
+                                spotQuality)
+                            db.collection("spots").document(spotId)
+                                .set(punto)
+                                .addOnSuccessListener {
+                                    Log.d(TAG, "DocumentSnapshot successfully overwritten!")
+                                    dialog.dismiss()
+                                    dialog =
+                                        AlertDialog.Builder(this)
+                                            .setTitle("Punto Modificado")
+                                            .setMessage("El punto ha sido modificado exitosamente")
+                                            .setPositiveButton("Ok", null)
+                                            .show()
+                                    dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                                        val intent = Intent(this@CreateMarkerActivity,MapsActivity::class.java)
+                                        val place = Place(spotId,punto.name,punto.description,punto.lat,punto.lng)
+                                        intent.putExtra(EXTRA_USER_MAIL,user.email)
+                                        intent.putExtra(EXTRA_MODIFIED_PLACE,place)
+                                        dialog.dismiss()
+                                        startActivity(intent)
+                                        this.finish()
+                                    }
+
+
+                                }
+                                .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
+                        }
+                    }else ->{
+                        Log.i(TAG,"error de ingreso")
+                    }
                 }
+
 
             }
             else -> {
@@ -200,66 +284,164 @@ class CreateMarkerActivity : AppCompatActivity() {
         }
 
     private fun loadAccessibilitySpinner() {
-         selectedAccessibility = ListaColor().defaultColorAccessibility
-         binding.spnrAccessibility.apply {
-             adapter = ColorSpinnerAdapter(applicationContext, ListaColor().accessibilityList())
-             setSelection(ListaColor().posicionEnListaAccessibility(selectedAccessibility), false)
-             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        when(parent){
+            1 ->{
+                selectedAccessibility = ListaColor().defaultColorAccessibility
+                binding.spnrAccessibility.apply {
+                    adapter = ColorSpinnerAdapter(applicationContext, ListaColor().accessibilityList())
+                    setSelection(ListaColor().posicionEnListaAccessibility(selectedAccessibility), false)
+                    onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 
-                 override fun onItemSelected(parent: AdapterView<*>?,
-                                            view: View?,
-                                            position: Int,
-                                            id: Long) {
-                     selectedAccessibility = ListaColor().accessibilityList()[position]
-                     positionAccessibility = position
-                     selectedAccessibility.name.also { selectedAccessibilityName = it }
-                 }
+                        override fun onItemSelected(parent: AdapterView<*>?,
+                                                    view: View?,
+                                                    position: Int,
+                                                    id: Long) {
+                            selectedAccessibility = ListaColor().accessibilityList()[position]
+                            positionAccessibility = position
+                            selectedAccessibility.name.also { selectedAccessibilityName = it }
+                        }
 
-                 override fun onNothingSelected(parent: AdapterView<*>?) {}
-             }
-         }
+                        override fun onNothingSelected(parent: AdapterView<*>?) {}
+                    }
+                }
+            }
+            2 ->{
+
+                val pos = spot.accesibility
+                selectedAccessibility = ListaColor().defaultColorAccessibility
+
+                binding.spnrAccessibility.apply {
+                    adapter = ColorSpinnerAdapter(applicationContext, ListaColor().accessibilityList())
+                    setSelection(pos!!)
+                    onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+
+                        override fun onItemSelected(parent: AdapterView<*>?,
+                                                    view: View?,
+                                                    position: Int,
+                                                    id: Long) {
+                            selectedAccessibility = ListaColor().accessibilityList()[position]
+                            positionAccessibility = position
+                            selectedAccessibility.name.also { selectedAccessibilityName = it }
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>?) {}
+                    }
+                }
+            }else ->{
+                Log.i(TAG,"Error setting parent")
+            }
+        }
      }
 
     private fun loadBortleCenterSpinner() {
-        selectedBortleCenter = ListaColor().defaultColorBortle
-        binding.spnrBortleCenter.apply {
-            adapter = ColorSpinnerAdapter(applicationContext,ListaColor().bortleList())
-            setSelection(ListaColor().posicionEnListaBortle(selectedBortleCenter),false)
-            onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+        when(parent){
+            1 ->{
+                selectedBortleCenter = ListaColor().defaultColorBortle
+                binding.spnrBortleCenter.apply {
+                    adapter = ColorSpinnerAdapter(applicationContext,ListaColor().bortleList())
+                    setSelection(ListaColor().posicionEnListaBortle(selectedBortleCenter),false)
+                    onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
 
-                override fun onItemSelected(parent: AdapterView<*>?,
-                                            view: View?,
-                                            position: Int,
-                                            id: Long) {
-                    selectedBortleCenter = ListaColor().bortleList()[position]
-                    positionCenter = position
-                    selectedBortleCenterName = selectedBortleCenter.name
+                        override fun onItemSelected(parent: AdapterView<*>?,
+                                                    view: View?,
+                                                    position: Int,
+                                                    id: Long) {
+                            selectedBortleCenter = ListaColor().bortleList()[position]
+                            positionCenter = position
+                            selectedBortleCenterName = selectedBortleCenter.name
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>?) {}
+                    }
                 }
+            }
+            2 ->{
+                val pos = spot.bortleCenter
+                selectedBortleCenter = ListaColor().defaultColorBortle
+                binding.spnrBortleCenter.apply {
+                    adapter = ColorSpinnerAdapter(applicationContext,ListaColor().bortleList())
+                    setSelection(pos!!)
+                    onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
 
-                override fun onNothingSelected(parent: AdapterView<*>?) {}
+                        override fun onItemSelected(parent: AdapterView<*>?,
+                                                    view: View?,
+                                                    position: Int,
+                                                    id: Long) {
+                            selectedBortleCenter = ListaColor().bortleList()[position]
+                            positionCenter = position
+                            selectedBortleCenterName = selectedBortleCenter.name
+                        }
+                        override fun onNothingSelected(parent: AdapterView<*>?) {}
+                    }
+                }
+            }else ->{
+                Log.i(TAG,"Error setting parent")
             }
         }
     }
 
     private fun loadBortleAreaSpinner() {
-        selectedBortleArea = ListaColor().defaultColorBortle
-        binding.spnrBortleArea.apply {
-            adapter = ColorSpinnerAdapter(applicationContext,ListaColor().bortleList() )
-            setSelection(ListaColor().posicionEnListaBortle(selectedBortleArea),false)
-            onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+        when(parent){
+            1 ->{
+                selectedBortleArea = ListaColor().defaultColorBortle
+                binding.spnrBortleArea.apply {
+                    adapter = ColorSpinnerAdapter(applicationContext,ListaColor().bortleList() )
+                    setSelection(ListaColor().posicionEnListaBortle(selectedBortleArea),false)
+                    onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
 
-                override fun onItemSelected(parent: AdapterView<*>?,
-                                            view: View?,
-                                            position: Int,
-                                            id: Long) {
-                    selectedBortleArea = ListaColor().bortleList()[position]
-                    positionArea = position
-                    selectedBortleAreaName = selectedBortleArea.name
+                        override fun onItemSelected(parent: AdapterView<*>?,
+                                                    view: View?,
+                                                    position: Int,
+                                                    id: Long) {
+                            selectedBortleArea = ListaColor().bortleList()[position]
+                            positionArea = position
+                            selectedBortleAreaName = selectedBortleArea.name
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>?) {}
+                    }
                 }
+            }
+            2 ->{
+                val pos = spot.maxBortle
+                selectedBortleArea = ListaColor().defaultColorBortle
+                binding.spnrBortleArea.apply {
+                    adapter = ColorSpinnerAdapter(applicationContext,ListaColor().bortleList() )
+                    setSelection(pos!!)
+                    onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
 
-                override fun onNothingSelected(parent: AdapterView<*>?) {}
+                        override fun onItemSelected(parent: AdapterView<*>?,
+                                                    view: View?,
+                                                    position: Int,
+                                                    id: Long) {
+                            selectedBortleArea = ListaColor().bortleList()[position]
+                            positionArea = position
+                            selectedBortleAreaName = selectedBortleArea.name
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>?) {}
+                    }
+                }
+            }else ->{
+                Log.i(TAG,"Error setting parent")
             }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        return super.onCreateOptionsMenu(menu)
+    }
+    @Suppress("DEPRECATION")
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        onBackPressed()
+        return true
+    }
+
+    override fun onBackPressed() {
+        val data = Intent()
+        data.putExtra(EXTRA_USER_MAIL,user.email)
+        setResult(Activity.RESULT_CANCELED,data)
+        finish()
     }
 
     private fun setSpotQuality(bortleCenter: Int?, maxBortle: Int?, accessibilitySpot: Int?): Float {

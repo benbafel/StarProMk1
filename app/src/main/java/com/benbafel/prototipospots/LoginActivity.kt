@@ -67,6 +67,7 @@ class LoginActivity : AppCompatActivity() {
                                     intent = Intent(this,MapsActivity::class.java)
                                     intent.putExtra(EXTRA_USER_MAIL,userEmail)
                                     startActivity(intent)
+                                    finish()
                                 }else{
                                     val currentUser = Firebase.auth.currentUser
                                     val dialog = AlertDialog

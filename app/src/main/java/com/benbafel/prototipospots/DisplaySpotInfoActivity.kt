@@ -1,5 +1,6 @@
 package com.benbafel.prototipospots
 
+import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
@@ -8,8 +9,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.EditText
-import android.widget.HeaderViewListAdapter
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -26,18 +27,22 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_display_spot_info.*
-import kotlinx.coroutines.delay
 import java.text.DecimalFormat
 
 
 private const val TAG = "DisplaySpotInfoActivity"
 const val EXTRA_COMM_LIST = "EXTRA_COMM_LIST"
+const val EXTRA_MODIFY_SPOT = "EXTRA_MODIFY_SPOT"
+@Suppress("DEPRECATION")
 class DisplaySpotInfoActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var binding: ActivityDisplaySpotInfoBinding
     private lateinit var vMap : MapView
     private lateinit var place: Place
     private lateinit var spot: Spot
     private lateinit var user: User
+    private lateinit var db: FirebaseFirestore
+    private  var pos :Int = -1
+    private lateinit var etDatePick: TextView
     private  var commList = mutableListOf<Comment>()
     private val df = DecimalFormat("#.####")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,9 +53,9 @@ class DisplaySpotInfoActivity : AppCompatActivity(), OnMapReadyCallback {
         vMap = spotInfoMap
         vMap.getMapAsync(this)
         vMap.onCreate(savedInstanceState)
+        pos = intent.getIntExtra(EXTRA_PLACE_POS,-1)
         place = intent.getSerializableExtra(EXTRA_PLACE) as Place
         user = intent.getSerializableExtra(EXTRA_USER) as User
-        Log.i(TAG,"USER MAIL = ${user.email}")
         supportActionBar?.title = intent.getStringExtra(EXTRA_SPOT_INFO_TITLE)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         btnReport.setOnClickListener{
@@ -72,7 +77,35 @@ class DisplaySpotInfoActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
 
+        btnCreateEvent.setOnClickListener {
+
+            val createEventView = LayoutInflater.from(this).inflate(R.layout.event_creator,null)
+            val dialog =
+                AlertDialog.Builder(this)
+                    .setView(createEventView)
+                    .setPositiveButton("OK",null)
+                    .show()
+            etDatePick = dialog.findViewById<TextView>(R.id.etDatePickerr)!!
+            dialog.findViewById<TextView>(R.id.etDatePickerr)!!.setOnClickListener {
+                showDatePickerDialog()
+            }
+
+        }
+
+
     }
+
+    private fun showDatePickerDialog() {
+        val datePicker = DatePickerFragment {day, month, year -> onDateSelected(day, month, year)}
+        datePicker.show(supportFragmentManager,"datePicker")
+    }
+
+    private fun onDateSelected(day: Int, month: Int, year: Int){
+        val txt = "se seleccionó el dia $day del mes $month del año $year"
+        etDatePick.text = txt
+
+    }
+
 
     private fun report() {
         val alertDialog = AlertDialog
@@ -83,18 +116,19 @@ class DisplaySpotInfoActivity : AppCompatActivity(), OnMapReadyCallback {
             .setNegativeButton("No",null)
             .show()
         alertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener{
-            val mapFormView = LayoutInflater.from(this).inflate(R.layout.dialog_report_spot,null)
+            val commentView = LayoutInflater.from(this).inflate(R.layout.dialog_report_spot,null)
             val alertdialog2 =
                 AlertDialog.Builder(this)
                     .setTitle("Reporte")
-                    .setView(mapFormView)
+                    .setView(commentView)
                     .setNegativeButton("Cancel", null)
                     .setPositiveButton("Ok",null)
                     .show()
             alertdialog2.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener{
-                val title = mapFormView.findViewById<EditText>(R.id.etReport).text.toString()
+                val title = commentView.findViewById<EditText>(R.id.etReport).text.toString()
                 if(title.trim().isEmpty()) {
                     Toast.makeText(this, "el reporte debe contener algo!", Toast.LENGTH_LONG).show()
+                    @Suppress("LABEL_NAME_CLASH")
                     return@setOnClickListener
                 }
                 val alertDialog3 = AlertDialog
@@ -114,13 +148,11 @@ class DisplaySpotInfoActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        Log.i(TAG,"se creo la opcion return")
         return super.onCreateOptionsMenu(menu)
-
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
-        val db = Firebase.firestore
+        db = Firebase.firestore
         val id = place.id
         getComments(id,db)
         val lat = place.latitude
@@ -148,6 +180,7 @@ class DisplaySpotInfoActivity : AppCompatActivity(), OnMapReadyCallback {
                 if (document != null) {
                     Log.i(TAG, " log 1 = ${document.id} => ${document.data}")
                     llenarSpot(document.data)
+                    opcionesDeCreador()
                 } else {
                     Log.i(TAG, "No such document")
                 }
@@ -156,13 +189,90 @@ class DisplaySpotInfoActivity : AppCompatActivity(), OnMapReadyCallback {
             }
     }
 
+    private fun opcionesDeCreador() {
+        if(user.name == spot.createdBy){
+            btnEliminarSpot.setOnClickListener {
+                Log.i(TAG,"presionaste eliminar")
+                val dialog=
+                    AlertDialog.Builder(this)
+                        .setTitle("Eliminar punto de observación")
+                        .setMessage("está a punto de eliminar este lugar, junto con toda su" +
+                                "informacion, eventos y comentarios. Está seguro que desea continuar?")
+                        .setPositiveButton("Eliminar punto",null)
+                        .setNegativeButton("Cancelar",null)
+                        .show()
+                dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                    //EliminarPunto()
+                    val idToDelete = spot.id
+                    db.collection("spots").document(idToDelete)
+                        .delete()
+                        .addOnSuccessListener {//si se ha borrado el punto, informar y terminar actividad
+                            dialog.setMessage("Se ha eliminado el punto Exitosamente!")
+                            dialog.getButton(DialogInterface.BUTTON_NEGATIVE).visibility = View.GONE
+                            dialog.getButton(DialogInterface.BUTTON_POSITIVE).text = getString(R.string.aceptar)
+                            dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                                val data = Intent()
+                                data.putExtra(EXTRA_PLACE_POS,pos)
+                                data.putExtra(EXTRA_USER_MAIL,user.email)
+                                setResult(Activity.RESULT_OK,data)
+                                dialog.dismiss()
+                                finish()
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.w(TAG, "Error deleting document", e)
+                            Toast.makeText(this,
+                                "Hubo un error al eliminar el punto!",
+                                Toast.LENGTH_LONG).show()
+                        }
+
+                }
+            }
+
+            btnModificarSpot.setOnClickListener {
+                val dialog =
+                    AlertDialog.Builder(this)
+                        .setTitle("Modificar punto")
+                        .setMessage("Esta seguro de querer modificar los datos de este punto?")
+                        .setPositiveButton("Sí",null)
+                        .setNegativeButton("No",null)
+                        .show()
+                dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                    val intent = Intent(this@DisplaySpotInfoActivity, CreateMarkerActivity::class.java)
+                    val lat = spot.lat
+                    val lng = spot.lng
+                    intent.putExtra(EXTRA_MODIFY_SPOT,spot)
+                    intent.putExtra(EXTRA_USER,user)
+                    intent.putExtra(EXTRA_LAT, lat)
+                    intent.putExtra(EXTRA_LNG, lng)
+                    intent.putExtra(PARENT,2)
+                    intent.putExtra(EXTRA_CREATE_TITLE, "Modificar punto de observación")
+                    startActivity(intent)
+                    dialog.dismiss()
+                    finish()
+                }
+            }
+        }else{
+            btnEliminarSpot.visibility = View.INVISIBLE
+            btnModificarSpot.visibility = View.INVISIBLE
+            Log.i(TAG,"buttons should be invisible")
+        }
+
+    }
+
     @Suppress("DEPRECATION")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val myIntent = Intent(applicationContext, MapsActivity::class.java)
-        myIntent.putExtra(EXTRA_USER_MAIL,user.email)
-        startActivityForResult(myIntent, 0)
+        onBackPressed()
         return true
     }
+
+    override fun onBackPressed() {
+        val data = Intent()
+        data.putExtra(EXTRA_USER_MAIL,user.email)
+        setResult(Activity.RESULT_CANCELED,data)
+        finish()
+    }
+
     private fun llenarSpot(data: Map<String, Any>?)  {
         val id = place.id
         val name = place.title
@@ -183,7 +293,6 @@ class DisplaySpotInfoActivity : AppCompatActivity(), OnMapReadyCallback {
         rbQual.rating = spotQuality
         insertBortleValViews(bortleCenter,maxBortle)
         fillAccessibilityView(accesibility,tvAccessibility)
-
         return
     }
 
@@ -225,18 +334,53 @@ class DisplaySpotInfoActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun fillBortle(bortle: Int, txtView: TextView?) {
         when (bortle) {
-            1 -> txtView!!.text = resources.getString(R.string.b1)
-            2 -> txtView!!.text = resources.getString(R.string.b2)
-            3 -> txtView!!.text = resources.getString(R.string.b3)
-            4 -> txtView!!.text = resources.getString(R.string.b4)
-            5 -> txtView!!.text = resources.getString(R.string.b5)
-            6 -> txtView!!.text = resources.getString(R.string.b6)
-            7 -> txtView!!.text = resources.getString(R.string.b7)
-            8 -> txtView!!.text = resources.getString(R.string.b8)
-            9 -> txtView!!.text = resources.getString(R.string.b9)
+            1 -> {
+                txtView!!.text = resources.getString(R.string.b1)
+                txtView.background.setTint(resources.getColor(R.color.bortle1))
+                txtView.setTextColor(resources.getColor(R.color.white))
+            }
+            2 -> {
+                txtView!!.text = resources.getString(R.string.b2)
+                txtView.background.setTint(resources.getColor(R.color.bortle2))
+                txtView.setTextColor(resources.getColor(R.color.white))
+            }
+            3 -> {
+                txtView!!.text = resources.getString(R.string.b3)
+                txtView.background.setTint(resources.getColor(R.color.bortle3))
+                txtView.setTextColor(resources.getColor(R.color.black))
+            }
+            4 -> {
+                txtView!!.text = resources.getString(R.string.b4)
+                txtView.background.setTint(resources.getColor(R.color.bortle4))
+                txtView.setTextColor(resources.getColor(R.color.black))
+            }
+            5 -> {
+                txtView!!.text = resources.getString(R.string.b5)
+                txtView.background.setTint(resources.getColor(R.color.bortle5))
+                txtView.setTextColor(resources.getColor(R.color.black))
+            }
+            6 -> {
+                txtView!!.text = resources.getString(R.string.b6)
+                txtView.background.setTint(resources.getColor(R.color.bortle6))
+                txtView.setTextColor(resources.getColor(R.color.black))
+            }
+            7 -> {
+                txtView!!.text = resources.getString(R.string.b7)
+                txtView.background.setTint(resources.getColor(R.color.bortle7))
+                txtView.setTextColor(resources.getColor(R.color.black))
+            }
+            8 -> {
+                txtView!!.text = resources.getString(R.string.b8)
+                txtView.background.setTint(resources.getColor(R.color.bortle8))
+                txtView.setTextColor(resources.getColor(R.color.black))
+            }
+            9 -> {
+                txtView!!.text = resources.getString(R.string.b9)
+                txtView.background.setTint(resources.getColor(R.color.bortle9))
+                txtView.setTextColor(resources.getColor(R.color.black))
+            }
         }
     }
-
 
     private fun setMapRestrictions(googleMap: GoogleMap) {
         googleMap.uiSettings.isScrollGesturesEnabledDuringRotateOrZoom = false
@@ -252,6 +396,19 @@ class DisplaySpotInfoActivity : AppCompatActivity(), OnMapReadyCallback {
                     .snippet(place.description)
                 ))
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13f))
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            val modifiedPlace = intent.getSerializableExtra(EXTRA_MODIFIED_PLACE) as Place
+            val dataToMapsActivity = Intent()
+            dataToMapsActivity.putExtra(EXTRA_USER_MAIL,user.email)
+            dataToMapsActivity.putExtra(EXTRA_PLACE,modifiedPlace)
+            dataToMapsActivity.putExtra(EXTRA_PLACE_POS,pos)
+            setResult(Activity.RESULT_FIRST_USER,dataToMapsActivity)
+            this.finish()
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     @Override

@@ -173,23 +173,23 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
+
         <EditText
             android:id="@+id/etCommentary"
             android:layout_width="match_parent"
-            android:layout_height="93dp"
-            android:layout_marginTop="8dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:background="#4E4D4B"
             android:ems="10"
             android:gravity="start|top"
-            android:hint="Escriba aca su comentario..."
+            android:hint="Escriba aca su comentario...\n\n\n\n"
             android:inputType="textMultiLine"
             android:minHeight="48dp"
             app:barrierMargin="@dimen/material_emphasis_medium"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.551"
+            app:layout_constraintHorizontal_bias="0.517"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView9" />
-
 
         <Button
             android:id="@+id/btnAddMrk"
@@ -197,6 +197,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="34dp"
             android:background="@drawable/round_button"
+            android:paddingStart="15dp"
+            android:paddingEnd="15dp"
             android:text="Agregar Punto de Observación"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

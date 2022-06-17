@@ -65,10 +65,10 @@ class RegisterActivity : AppCompatActivity() {
         }
 
     }
+
     @Suppress("DEPRECATION")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val myIntent = Intent(applicationContext, LoginActivity::class.java)
-        startActivityForResult(myIntent, 0)
+        onBackPressed()
         return true
     }
 

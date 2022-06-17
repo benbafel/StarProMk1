@@ -8,6 +8,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -29,18 +30,19 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.delay
 import java.text.DecimalFormat
 import kotlin.math.pow
 import kotlin.math.sqrt
 
+const val PARENT = "PARENT"
 const val EXTRA_SPOT_INFO_TITLE = "EXTRA_SPOT_INFO_TITLE"
 const val EXTRA_CREATE_TITLE = "EXTRA_CREATE_TITLE"
 const val REQUEST_CODE = 1234
+const val DISPLAY_INFO_CODE = 3333
 const val EXTRA_LAT = "EXTRA_LAT"
 const val EXTRA_LNG = "EXTRA_LNG"
 const val EXTRA_USER = "EXTRA_USER"
-const val EXTRA_USER_NAME = "EXTRA_USER_NAME"
+const val EXTRA_PLACE_POS = "EXTRA_PLACE_POS"
 private const val TAG = "MapsActivity"
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var infoShown: Boolean = true
@@ -55,6 +57,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var userData :User
     private lateinit var userEmail: String
     private lateinit var userLocation: LatLng
+    private lateinit var markerToDisplay: Marker
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -147,6 +150,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         mMap.setOnInfoWindowClickListener { markerInfo ->
             Log.i(TAG, "OnInfoWindowClickListener")
+
             if(markerInfo.position != userLocation){
                 getPlaceFromPlaces(markerInfo)
             }else{
@@ -200,20 +204,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         return sqrt(restX + restY)
     }
 
-    //private fun loadMarkers() {
-    //    for (place in places){
-    //        val lat = place.latitude
-    //        val lng = place.longitude
-    //        val latLng = LatLng(lat,lng)
-    //
-    //        mMap.addMarker(MarkerOptions().title(place.title).position(latLng).snippet())
-    //    }
-    //}
-
-
     private fun getPlaceFromPlaces(markerInfo: Marker) {
-        Log.i(TAG,"places is empty = ${places.isEmpty()}")
         val db = Firebase.firestore
+        markerToDisplay = markerInfo
         val spotsRef = db.collection("spots")
         for (place in places){
             val placeLat = place.latitude
@@ -225,16 +218,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
             if(placelatLng == markerlatLng){
                 actualPlace=place
+                Log.i(TAG,"position in places: ${places.indexOf(actualPlace)}")
                 spotsRef.whereEqualTo("id",place.id)
                     .limit(1)
                     .get()
                     .addOnSuccessListener { result ->
                         for (document in result){
                             val intent = Intent(this@MapsActivity, DisplaySpotInfoActivity::class.java)
+                            intent.putExtra(EXTRA_PLACE_POS,places.indexOf(actualPlace))
                             intent.putExtra(EXTRA_USER,userData)
                             intent.putExtra(EXTRA_PLACE,actualPlace)
                             intent.putExtra(EXTRA_SPOT_INFO_TITLE, "${place.title}")
-                            startActivity(intent)
+                            startActivityForResult(intent, DISPLAY_INFO_CODE)
                         }
                     }
 
@@ -246,7 +241,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun crearNuevoSpot(latLng: LatLng) {
         Log.i(TAG, "VALOR coordenadas: $latLng")
-
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng))
         if(!closeToMarker(latLng)) {
             val dialog =
                 AlertDialog.Builder(this)
@@ -266,6 +261,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 val intent = Intent(this@MapsActivity, CreateMarkerActivity::class.java)
                 val lat = latLng.latitude
                 val lng = latLng.longitude
+                intent.putExtra(PARENT,1)
                 intent.putExtra(EXTRA_USER,userData)
                 intent.putExtra(EXTRA_LAT, lat)
                 intent.putExtra(EXTRA_LNG, lng)
@@ -287,6 +283,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 val intent = Intent(this@MapsActivity, CreateMarkerActivity::class.java)
                 val lat = latLng.latitude
                 val lng = latLng.longitude
+                intent.putExtra(PARENT,1)
                 intent.putExtra(EXTRA_LAT, lat)
                 intent.putExtra(EXTRA_LNG, lng)
                 intent.putExtra(EXTRA_CREATE_TITLE, "Crear punto de observación")
@@ -324,7 +321,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     val latLng = LatLng(lat, lng)
                     mMap.addMarker(
                         MarkerOptions().title(place.title).position(latLng)
-                            .snippet("Ver datos del punto")
+                            .snippet("Clic aqui para ver datos")
                     )
                 }
 
@@ -336,13 +333,34 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            //Get new map data from the data
+            //Get new PLACE data from the data
             val newSpot = data?.getSerializableExtra(EXTRA_PLACE) as Place
             val latLng = LatLng(newSpot.latitude,newSpot.longitude)
             places.add(newSpot)
-            mMap.addMarker(MarkerOptions().title(newSpot.title).position(latLng).snippet("Ver datos del punto"))
+            mMap.addMarker(MarkerOptions().title(newSpot.title).position(latLng).snippet("Clic aqui para ver datos"))
             Log.i(TAG, "onActivityResult with new map title ${newSpot.title}")
+        }else if(requestCode == DISPLAY_INFO_CODE && resultCode == Activity.RESULT_OK){
+            val pos = data?.getIntExtra(EXTRA_PLACE_POS,-1)
+            if(pos != -1){
+                val placeToDelete = places[pos!!]
+                Log.i(TAG,"place to delete: $placeToDelete")
+                places.remove(placeToDelete)
+                markerToDisplay.remove()
+            } else{
+                Log.i(TAG,"Error in place position, something went wrong!")
+            }
+        }else if(requestCode == DISPLAY_INFO_CODE && resultCode == Activity.RESULT_FIRST_USER){
+            val pos = data?.getIntExtra(EXTRA_PLACE_POS,-1)
+            val newPlaceData = data?.getSerializableExtra(EXTRA_PLACE) as Place
+            val placeToDelete = places[pos!!]
+            markerToDisplay.title = newPlaceData.title
+            places.remove(placeToDelete)
+            places.add(newPlaceData)
         }
         super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    override fun onBackPressed() {
+        Toast.makeText(this,"No hay donde retroceder!",Toast.LENGTH_LONG).show()
     }
 }
